@@ -4,7 +4,7 @@
 
 [![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
 
-**维护者：** 徐硕（Shuo Xu），Independent Researcher, China  
+**维护者：** 徐硕（Shuo Xu），Independent Researcher, China；[ORCID 0009-0006-6718-4707](https://orcid.org/0009-0006-6718-4707)
 **联系邮箱：** 1402855443@qq.com  
 **许可证：** MIT
 

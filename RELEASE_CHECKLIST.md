@@ -15,13 +15,13 @@
 
 ## Author actions required before public release
 
-- [ ] Register an ORCID and add it to `AUTHORS.md`, `CITATION.cff`, and
+- [x] Register an ORCID and add it to `AUTHORS.md`, `CITATION.cff`, and
   `paper/paper.md`.
 - [x] Create a GitHub account or choose another public Git host.
 - [x] Create a public repository named `agent-reliability-harness`.
-- [ ] Push the prepared local Git history.
-- [ ] Confirm that GitHub Actions passes on Linux and Windows.
-- [ ] Add repository and issue-tracker URLs to `pyproject.toml` and
+- [x] Push the prepared local Git history.
+- [x] Confirm that GitHub Actions passes on Linux and Windows.
+- [x] Add repository and issue-tracker URLs to `pyproject.toml` and
   `CITATION.cff`.
 - [ ] Create release `v0.1.0` and archive it with Zenodo to obtain a DOI.
 - [ ] Add the release DOI to `CITATION.cff` and the JOSS submission form.

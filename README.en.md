@@ -4,7 +4,7 @@ English | [中文](README.md)
 
 [![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
 
-**Maintainer:** Shuo Xu, Independent Researcher, China  
+**Maintainer:** Shuo Xu, Independent Researcher, China; [ORCID 0009-0006-6718-4707](https://orcid.org/0009-0006-6718-4707)
 **Contact:** 1402855443@qq.com  
 **License:** MIT
 

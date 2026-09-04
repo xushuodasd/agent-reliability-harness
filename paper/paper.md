@@ -9,6 +9,7 @@ tags:
 authors:
   - name: Shuo Xu
     affiliation: 1
+    orcid: 0009-0006-6718-4707
 affiliations:
   - name: Independent Researcher, China
     index: 1

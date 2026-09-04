@@ -8,6 +8,7 @@ authors:
   - family-names: Xu
     given-names: Shuo
     email: 1402855443@qq.com
+    orcid: "https://orcid.org/0009-0006-6718-4707"
 license: MIT
 repository-code: "https://github.com/xushuodasd/agent-reliability-harness"
 url: "https://github.com/xushuodasd/agent-reliability-harness"

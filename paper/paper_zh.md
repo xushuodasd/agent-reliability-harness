@@ -4,6 +4,7 @@
 **英文署名：** Shuo Xu  
 **作者单位：** Independent Researcher, China  
 **通讯邮箱：** 1402855443@qq.com  
+**ORCID：** [0009-0006-6718-4707](https://orcid.org/0009-0006-6718-4707)
 **稿件用途：** JOSS英文软件论文的中文对照稿
 
 ## 摘要
