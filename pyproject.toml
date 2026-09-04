@@ -19,6 +19,11 @@ classifiers = [
   "Topic :: Software Development :: Testing",
 ]
 
+[project.urls]
+Homepage = "https://github.com/xushuodasd/agent-reliability-harness"
+Repository = "https://github.com/xushuodasd/agent-reliability-harness"
+Issues = "https://github.com/xushuodasd/agent-reliability-harness/issues"
+
 [project.scripts]
 pilot-harness = "pilot_harness.cli:main"
 pilot-rehearsal = "pilot_harness.rehearsal:main"

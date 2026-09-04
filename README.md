@@ -2,6 +2,8 @@
 
 [English](README.en.md) | 中文
 
+[![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
+
 **维护者：** 徐硕（Shuo Xu），Independent Researcher, China  
 **联系邮箱：** 1402855443@qq.com  
 **许可证：** MIT

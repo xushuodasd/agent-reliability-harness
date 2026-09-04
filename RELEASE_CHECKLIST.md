@@ -17,8 +17,8 @@
 
 - [ ] Register an ORCID and add it to `AUTHORS.md`, `CITATION.cff`, and
   `paper/paper.md`.
-- [ ] Create a GitHub account or choose another public Git host.
-- [ ] Create a public repository named `agent-reliability-harness`.
+- [x] Create a GitHub account or choose another public Git host.
+- [x] Create a public repository named `agent-reliability-harness`.
 - [ ] Push the prepared local Git history.
 - [ ] Confirm that GitHub Actions passes on Linux and Windows.
 - [ ] Add repository and issue-tracker URLs to `pyproject.toml` and

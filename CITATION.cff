@@ -9,6 +9,8 @@ authors:
     given-names: Shuo
     email: 1402855443@qq.com
 license: MIT
+repository-code: "https://github.com/xushuodasd/agent-reliability-harness"
+url: "https://github.com/xushuodasd/agent-reliability-harness"
 abstract: >-
   An auditable experimental harness for evaluating tool-using language-model
   agents with state-based grading, controlled fault injection, evidence-chain

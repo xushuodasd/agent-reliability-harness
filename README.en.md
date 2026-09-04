@@ -2,6 +2,8 @@
 
 English | [中文](README.md)
 
+[![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
+
 **Maintainer:** Shuo Xu, Independent Researcher, China  
 **Contact:** 1402855443@qq.com  
 **License:** MIT
@@ -96,9 +98,8 @@ code or target production systems.
 
 ## Citation
 
-Citation metadata is provided in [CITATION.cff](CITATION.cff). Add the public
-repository URL and archived release DOI after publication infrastructure has
-been created.
+Citation metadata is provided in [CITATION.cff](CITATION.cff). Add the archived
+release DOI after the first public release has been deposited.
 
 ## License
 
