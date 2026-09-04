@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/pilot-harness/summary.schema.json",
+  "title": "Pilot run summary",
+  "type": "object",
+  "required": ["episodes", "successes", "results"],
+  "properties": {
+    "notice": {"type": "string"},
+    "episodes": {"type": "integer", "minimum": 0},
+    "successes": {"type": "integer", "minimum": 0},
+    "success_rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "by_provider_fault": {"type": "object"},
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["episode_id", "task_id", "success", "reason", "steps", "duration_ms"],
+        "properties": {
+          "episode_id": {"type": "string", "minLength": 1},
+          "task_id": {"type": "string", "minLength": 1},
+          "provider": {"type": "string"},
+          "family": {"type": "string"},
+          "fault": {"type": "string"},
+          "success": {"type": "boolean"},
+          "reason": {"type": "string"},
+          "steps": {"type": "integer", "minimum": 0},
+          "duration_ms": {"type": "integer", "minimum": 0},
+          "injection_receipt": {"$ref": "injection-receipt.schema.json"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

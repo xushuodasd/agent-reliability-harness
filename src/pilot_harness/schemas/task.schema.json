@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/pilot-harness/task.schema.json",
+  "title": "Deterministic agent task slice",
+  "type": "object",
+  "required": ["schema_version", "task_id", "family", "instruction", "initial_state", "expected_state", "allowed_actions", "max_steps"],
+  "properties": {
+    "schema_version": {"const": "agent-task-slice/v1"},
+    "task_id": {"type": "string", "minLength": 1},
+    "family": {"type": "string", "minLength": 1},
+    "instruction": {"type": "string", "minLength": 1},
+    "initial_state": {"type": "object"},
+    "expected_state": {"type": "object"},
+    "allowed_actions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "max_steps": {"type": "integer", "minimum": 1}
+    ,"family_id": {"type": "string", "minLength": 1}
+    ,"difficulty": {"enum": ["easy", "medium", "hard"]}
+    ,"risk": {"enum": ["low", "medium", "high"]}
+    ,"reversibility": {"enum": ["reversible", "partially_reversible", "irreversible"]}
+    ,"prerequisites": {"type": "array", "items": {"type": "string", "minLength": 1}}
+    ,"objective": {"type": "string", "minLength": 1}
+    ,"constraints": {"type": "array", "items": {"type": "string", "minLength": 1}}
+    ,"hard_constraints": {"type": "array", "items": {"type": "string", "minLength": 1}}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/pilot-harness/injection-receipt.schema.json",
+  "title": "Fault injection receipt",
+  "type": "object",
+  "required": ["schema_version", "planned_mode", "status", "execution_truth"],
+  "properties": {
+    "schema_version": {"const": "pilot-injection-receipt/1"},
+    "planned_mode": {"enum": ["none", "timeout_once", "timeout_committed_once", "malformed_once", "noop_once"]},
+    "status": {"enum": ["NOT_APPLICABLE", "APPLIED", "PARTIAL", "ARMED_NOT_REACHED", "INFRA_FAILURE"]},
+    "execution_truth": {"enum": ["NO_INJECTION_PLANNED", "NOT_EXECUTED", "EXECUTED_BEFORE_ERROR", "EXECUTED_OBSERVATION_CORRUPTED", "SUPPRESSED_NOT_EXECUTED", "NOT_REACHED", "PARTIALLY_EXECUTED", "UNKNOWN_INFRA"]}
+  },
+  "additionalProperties": false
+}

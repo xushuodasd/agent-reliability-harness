@@ -1,0 +1,34 @@
+[project]
+name = "agent-reliability-harness"
+version = "0.1.0"
+description = "Auditable reliability experiments for tool-using language-model agents"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Shuo Xu", email = "1402855443@qq.com"},
+]
+keywords = ["llm-agents", "reliability", "fault-injection", "evaluation", "audit"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Testing",
+]
+
+[project.scripts]
+pilot-harness = "pilot_harness.cli:main"
+pilot-rehearsal = "pilot_harness.rehearsal:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pilot_harness = ["schemas/*.json"]

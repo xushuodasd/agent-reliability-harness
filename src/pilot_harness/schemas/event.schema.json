@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/pilot-harness/event.schema.json",
+  "title": "Pilot audit event",
+  "type": "object",
+  "required": ["schema_version", "sequence", "previous_hash", "event_hash", "event"],
+  "properties": {
+    "schema_version": {"const": "pilot-event/1"},
+    "sequence": {"type": "integer", "minimum": 0},
+    "previous_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "event_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "event": {"type": "string", "minLength": 1},
+    "episode_id": {"type": "string", "minLength": 1},
+    "injection_receipt": {"$ref": "injection-receipt.schema.json"}
+  },
+  "additionalProperties": true
+}
