@@ -3,10 +3,13 @@
 [English](README.en.md) | 中文
 
 [![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22306201.svg)](https://doi.org/10.5281/zenodo.22306201)
 
 **维护者：** 徐硕（Shuo Xu），Independent Researcher, China；[ORCID 0009-0006-6718-4707](https://orcid.org/0009-0006-6718-4707)
 **联系邮箱：** 1402855443@qq.com  
 **许可证：** MIT
+
+**引用：** 所有版本使用概念 DOI [`10.5281/zenodo.22306201`](https://doi.org/10.5281/zenodo.22306201)；`v0.1.2` 的版本 DOI 为 [`10.5281/zenodo.22306202`](https://doi.org/10.5281/zenodo.22306202)。
 
 一个完全离线、仅使用 Python 标准库的最小 Agent 可靠性实验框架。它提供：
 

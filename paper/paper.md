@@ -85,6 +85,15 @@ The harness is not a hardened sandbox and must not execute untrusted generated
 code or target production systems. It is best used as an experimental control
 plane for bounded synthetic environments and sanitized provider traces.
 
+# Software availability
+
+The source code is publicly available at
+[github.com/xushuodasd/agent-reliability-harness](https://github.com/xushuodasd/agent-reliability-harness).
+All archived versions are identified by the Zenodo concept DOI
+[`10.5281/zenodo.22306201`](https://doi.org/10.5281/zenodo.22306201); the
+reviewed `v0.1.2` release is archived as
+[`10.5281/zenodo.22306202`](https://doi.org/10.5281/zenodo.22306202).
+
 # Acknowledgements
 
 The author received no specific funding for this work.

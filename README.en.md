@@ -3,6 +3,7 @@
 English | [中文](README.md)
 
 [![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22306201.svg)](https://doi.org/10.5281/zenodo.22306201)
 
 **Maintainer:** Shuo Xu, Independent Researcher, China; [ORCID 0009-0006-6718-4707](https://orcid.org/0009-0006-6718-4707)
 **Contact:** 1402855443@qq.com  
@@ -98,8 +99,9 @@ code or target production systems.
 
 ## Citation
 
-Citation metadata is provided in [CITATION.cff](CITATION.cff). Add the archived
-release DOI after the first public release has been deposited.
+Citation metadata is provided in [CITATION.cff](CITATION.cff). Cite all versions
+with the concept DOI [`10.5281/zenodo.22306201`](https://doi.org/10.5281/zenodo.22306201),
+or cite version `v0.1.2` with [`10.5281/zenodo.22306202`](https://doi.org/10.5281/zenodo.22306202).
 
 ## License
 

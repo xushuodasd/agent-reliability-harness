@@ -27,6 +27,12 @@
 
 该工具不是安全沙箱，不得执行不可信模型生成代码，也不得连接生产系统。它适合作为合成隔离环境和脱敏模型轨迹的实验控制层。
 
+## 软件获取与引用
+
+源代码公开托管于[GitHub仓库](https://github.com/xushuodasd/agent-reliability-harness)。
+全部版本的Zenodo概念DOI为[`10.5281/zenodo.22306201`](https://doi.org/10.5281/zenodo.22306201)，
+本稿对应的`v0.1.2`版本DOI为[`10.5281/zenodo.22306202`](https://doi.org/10.5281/zenodo.22306202)。
+
 ## 致谢与资金
 
 本研究未获得专项外部资助。

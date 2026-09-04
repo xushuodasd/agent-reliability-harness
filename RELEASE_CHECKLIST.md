@@ -24,8 +24,8 @@
 - [x] Add repository and issue-tracker URLs to `pyproject.toml` and
   `CITATION.cff`.
 - [x] Create release `v0.1.1` on GitHub.
-- [ ] Create DOI-backed release `v0.1.2` after enabling Zenodo archiving.
-- [ ] Add the release DOI to `CITATION.cff` and the JOSS submission form.
+- [x] Create DOI-backed release `v0.1.2` after enabling Zenodo archiving.
+- [x] Add the release DOI to `CITATION.cff` and the manuscript materials.
 
 ## JOSS readiness gates
 

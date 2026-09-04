@@ -4,6 +4,11 @@ title: "Agent Reliability Harness"
 type: software
 version: 0.1.2
 date-released: 2026-09-04
+doi: 10.5281/zenodo.22306201
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22306202
+    description: "DOI for version v0.1.2"
 authors:
   - family-names: Xu
     given-names: Shuo
