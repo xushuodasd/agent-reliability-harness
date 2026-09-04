@@ -51,7 +51,19 @@ Agent Reliability Harness addresses this need with five design commitments:
 5. Factorial plans and atomic progress files support deterministic ordering,
    interruption recovery, and independent acceptance checks.
 
-# Functionality
+# State of the field
+
+ReAct established a general pattern for interleaving language-model reasoning
+and external actions [@react]. SWE-bench evaluates agents against real software
+issues [@swebench], while tau-bench adds policy-constrained interactions and
+AgentDojo studies prompt-injection attacks in tool-integrated agents
+[@taubench; @agentdojo]. These systems provide important tasks and threat
+models. Agent Reliability Harness is complementary: it focuses on controlled
+execution faults, explicit side-effect truth, independent state verification,
+and portable evidence artifacts that can be applied consistently across model
+providers and synthetic task environments.
+
+# Software design
 
 The included task catalog spans deterministic file operations, idempotent ledger
 updates, restricted software configuration repair, optimistic web-backend state,
@@ -84,6 +96,27 @@ budget, plan-hash, and environment freezing before confirmatory collection.
 The harness is not a hardened sandbox and must not execute untrusted generated
 code or target production systems. It is best used as an experimental control
 plane for bounded synthetic environments and sanitized provider traces.
+
+# Research impact statement
+
+The software has been used by the author to execute a complete 864-cell
+deterministic engineering rehearsal and 72 bounded exploratory episodes against
+two independent OpenAI-compatible model providers. Those runs identified
+provider-compatibility and response-truncation failure modes and exercised the
+same evidence contracts used by the offline test suite. The results are reported
+as engineering validation rather than confirmatory model comparisons; the
+sanitized protocol and limitations are documented in the repository. Broader
+research impact and independent adoption are not yet claimed for this initial
+release.
+
+# AI usage disclosure
+
+OpenAI Codex using a GPT-5-family model (accessed September 2026) assisted with
+research planning, software implementation, automated-test development,
+documentation, and drafting and language editing of this paper. MiniMax M3 and
+DeepSeek V4 models were used only as subjects in bounded exploratory provider
+tests. The author reviewed the generated material, verified the public artifacts,
+and accepts responsibility for the software, claims, citations, and manuscript.
 
 # Software availability
 

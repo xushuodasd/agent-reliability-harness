@@ -29,9 +29,10 @@
 
 ## JOSS readiness gates
 
-- [ ] The public repository shows sustained development history rather than a
-  single generated upload.
+- [ ] The public repository has more than six months of active public
+  development history (earliest eligible date: after 2027-03-04).
 - [ ] At least one external user or independent reproduction is documented.
+- [ ] Research use and impact are documented beyond engineering smoke tests.
 - [ ] Installation and example commands work from a clean public checkout.
 - [ ] The software is feature-complete for the claimed research use.
 - [ ] The author has read and accepted JOSS's current submission requirements.

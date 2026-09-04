@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented here.
 
+## Unreleased
+
+- Added Zenodo concept and version DOI metadata.
+- Updated the JOSS paper structure and AI-use disclosure for the 2026 guidance.
+- Published sanitized exploratory provider-validation results, governance, and a
+  public roadmap.
+
 ## 0.1.2 - 2026-09-04
 
 - Enabled GitHub-to-Zenodo software preservation for citable releases.

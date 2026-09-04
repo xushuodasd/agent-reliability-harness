@@ -97,6 +97,11 @@ See [Reproducibility](docs/reproducibility.md) for the artifact workflow and
 harness is not a hardened sandbox and must not run untrusted model-generated
 code or target production systems.
 
+Sanitized, non-confirmatory engineering outcomes from the initial provider
+smoke tests are documented in [Exploratory provider validation](docs/pilot-results.md).
+Project direction and support expectations are documented in
+[ROADMAP.md](ROADMAP.md) and [GOVERNANCE.md](GOVERNANCE.md).
+
 ## Citation
 
 Citation metadata is provided in [CITATION.cff](CITATION.cff). Cite all versions
