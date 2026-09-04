@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## 0.1.2 - 2026-09-04
+
+- Enabled GitHub-to-Zenodo software preservation for citable releases.
+- Refreshed release metadata for the first DOI-backed archive.
+
 ## 0.1.1 - 2026-09-04
 
 - Added the author's verified ORCID to citation, paper, and maintainer metadata.
