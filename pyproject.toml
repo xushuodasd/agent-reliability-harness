@@ -1,10 +1,11 @@
 [project]
 name = "agent-reliability-harness"
-version = "0.1.0"
+version = "0.1.1"
 description = "Auditable reliability experiments for tool-using language-model agents"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {file = "LICENSE"}
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
   {name = "Shuo Xu", email = "1402855443@qq.com"},
 ]
@@ -12,7 +13,6 @@ keywords = ["llm-agents", "reliability", "fault-injection", "evaluation", "audit
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",

@@ -23,7 +23,7 @@
 - [x] Confirm that GitHub Actions passes on Linux and Windows.
 - [x] Add repository and issue-tracker URLs to `pyproject.toml` and
   `CITATION.cff`.
-- [ ] Create release `v0.1.0` and archive it with Zenodo to obtain a DOI.
+- [ ] Create release `v0.1.1` and archive it with Zenodo to obtain a DOI.
 - [ ] Add the release DOI to `CITATION.cff` and the JOSS submission form.
 
 ## JOSS readiness gates

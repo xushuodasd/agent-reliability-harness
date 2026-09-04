@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here.
 
+## 0.1.1 - 2026-09-04
+
+- Added the author's verified ORCID to citation, paper, and maintainer metadata.
+- Confirmed the public GitHub repository and cross-platform CI workflow.
+- Expanded the automated regression suite to 83 tests.
+
 ## 0.1.0 - 2026-09-04
 
 - Added deterministic file, ledger, software, web-backend, and security tasks.
