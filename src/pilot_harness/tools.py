@@ -26,6 +26,9 @@ class ToolExecutor:
                 path = self._safe_path(str(action.arguments["path"]))
                 return Observation(True, path.read_text(encoding="utf-8"))
             return Observation(False, None, f"unknown tool: {action.kind}")
-        except (KeyError, OSError, ValueError) as exc:
+        except OSError as exc:
+            # Random host workspace paths must not alter the model's observation
+            # across paired runs or expose local account/directory information.
+            return Observation(False, None, f"filesystem error: {type(exc).__name__} (errno={exc.errno})")
+        except (KeyError, ValueError) as exc:
             return Observation(False, None, str(exc))
-

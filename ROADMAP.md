@@ -13,6 +13,9 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
 
 ## Research validation
 
+- Follow the [2026-09-07 research audit](docs/research-progress-2026-09-07.md):
+  prioritize independent task structures, blinded commit ambiguity, matched
+  baselines and cluster-aware analysis before scaling paid runs.
 - Freeze and publicly timestamp a confirmatory experimental protocol.
 - Run balanced real-provider experiments only after model, prompt, budget,
   exclusion, and analysis policies are fixed.

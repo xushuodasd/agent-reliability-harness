@@ -106,7 +106,9 @@ class UnifiedEpisodeEngine:
         self.schema = SchemaRegistry(schema_dir or Path(__file__).parent / "schemas")
 
     def run(self, task: Task | TaskSliceSpec | SecurityTaskSpec, provider: Provider,
-            fault: str = "none", episode_id: str | None = None) -> UnifiedEpisodeResult:
+            fault: str = "none", episode_id: str | None = None,
+            fault_actions: tuple[str, ...] | None = None) -> UnifiedEpisodeResult:
+        injector = FaultInjector(fault, eligible_actions=fault_actions)
         # Identity is allocated before setup/provider work, so infrastructure failures remain attributable.
         episode_id = episode_id or uuid.uuid4().hex
         episode_dir = self.run_dir / "episodes" / episode_id
@@ -119,12 +121,12 @@ class UnifiedEpisodeEngine:
         reset, cleanup, execute, verify = self._prepare(task, episode_dir)
         self.schema.validate(reset, "reset-receipt.schema.json")
         history: list[tuple[Action, Observation]] = []
-        injector = FaultInjector(fault)
         claimed = False
         provider_failed: str | None = None
         logger.write({"event": "episode_start", "episode_id": episode_id,
                       "contract": asdict(contract), "reset_receipt": reset,
-                      "provider": provider.name, "fault": fault})
+                      "provider": provider.name, "fault": fault,
+                      "fault_actions": list(fault_actions) if fault_actions else None})
         try:
             for step in range(1, contract.max_steps + 1):
                 try:
@@ -185,7 +187,8 @@ class UnifiedEpisodeEngine:
                     raise RuntimeError(f"event schema violation at line {line_number}: {exc}") from exc
             (episode_dir / "chain.json").write_text(json.dumps(asdict(chain), sort_keys=True, indent=2) + "\n", encoding="utf-8")
             manifest = write_manifest(episode_dir, metadata={"episode_id": episode_id, "task_id": task.task_id,
-                                                             "provider": provider.name, "fault": fault})
+                                                             "provider": provider.name, "fault": fault,
+                                                             "fault_actions": list(fault_actions) if fault_actions else None})
             self.schema.validate(json.loads(manifest.read_text(encoding="utf-8")), "manifest.schema.json")
             valid, errors = verify_manifest(manifest)
             if not valid:

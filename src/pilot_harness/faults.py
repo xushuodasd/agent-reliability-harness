@@ -6,6 +6,9 @@ from .models import Action, Observation
 
 
 FAULTS = ("none", "timeout_once", "timeout_committed_once", "malformed_once", "noop_once")
+MUTATING_ACTIONS = frozenset({"write_file", "write_local", "post_ledger_entry",
+                              "set_config_value", "create_resource", "update_resource"})
+TIMEOUT_MESSAGE = "injected timeout"
 
 
 @dataclass(frozen=True)
@@ -24,25 +27,42 @@ class FaultInjector:
     mode: str = "none"
     injected: bool = False
     status_override: str | None = None
+    eligible_actions: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
         if self.mode not in FAULTS:
             raise ValueError(f"unknown fault mode: {self.mode}")
+        if self.eligible_actions is not None and (
+            not isinstance(self.eligible_actions, tuple) or not self.eligible_actions
+            or any(not isinstance(x, str) or not x.strip() or x == "finish" for x in self.eligible_actions)
+        ):
+            raise ValueError("eligible_actions must be a nonempty tuple of tool names")
+
+    def _eligible(self, action: Action) -> bool:
+        if action.kind == "finish":
+            return False
+        if self.eligible_actions is not None and action.kind not in self.eligible_actions:
+            return False
+        return self.mode != "timeout_committed_once" or action.kind in MUTATING_ACTIONS
 
     def before(self, action: Action) -> Observation | None:
-        if self.injected or action.kind == "finish" or self.mode == "none":
+        if self.injected or not self._eligible(action) or self.mode == "none":
             return None
         if self.mode == "timeout_once":
             self.injected = True
-            return Observation(False, None, "injected timeout")
+            return Observation(False, None, TIMEOUT_MESSAGE)
         return None
 
     def after(self, action: Action, observation: Observation) -> Observation:
-        if self.injected or action.kind == "finish" or self.mode == "none":
+        if self.injected or not self._eligible(action) or self.mode == "none":
+            return observation
+        if self.mode == "timeout_committed_once" and not observation.ok:
+            # A rejected mutation is not evidence of a durable commit.
             return observation
         self.injected = True
         if self.mode == "timeout_committed_once":
-            return Observation(False, None, "injected timeout after durable commit")
+            # Execution truth belongs only in the evaluator receipt.
+            return Observation(False, None, TIMEOUT_MESSAGE)
         if self.mode == "malformed_once":
             return Observation(True, "{malformed-response")
         if self.mode == "noop_once":
@@ -50,7 +70,7 @@ class FaultInjector:
         return observation
 
     def suppress_execution(self, action: Action) -> bool:
-        return not self.injected and self.mode == "noop_once" and action.kind != "finish"
+        return not self.injected and self.mode == "noop_once" and self._eligible(action)
 
     def receipt(self) -> InjectionReceipt:
         if self.status_override == "PARTIAL":

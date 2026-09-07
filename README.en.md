@@ -94,6 +94,11 @@ budgets, task set, exclusions, and analysis plan were frozen before collection.
 
 See [Reliable pairing](docs/analysis-pairing.md) before analyzing repeated runs.
 
+For plan-joined analysis retaining missing outcomes, see
+[Cluster analysis](docs/cluster-analysis.md). The
+[research progress audit](docs/research-progress-2026-09-07.md) records current
+limitations and the offline blinded-timeout reproduction command.
+
 See [Reproducibility](docs/reproducibility.md) for the artifact workflow and
 [Security Policy](SECURITY.md) for credential and execution constraints. The
 harness is not a hardened sandbox and must not run untrusted model-generated

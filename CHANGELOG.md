@@ -4,6 +4,13 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Added plan-joined, task-weighted cluster bootstrap analysis with explicit
+  missing-run counts and unknown-outcome bounds.
+- Blinded pre-execution and post-commit timeout observations; post-commit faults
+  now require successful known mutation tools. Added an explicit fault-action
+  filter to the unified engine and an offline evidence demo.
+- Normalized file-system errors to avoid random host paths in model observations.
+- Recorded research overlap, three-template limitations, and staged SCI work.
 - Fixed order-dependent engineering pairing: repeated observations require
   explicit matched `pair_id` values; ambiguous, duplicate or mismatched rows fail.
 - Reject nonbinary outcomes and empty/self contrasts; exclude unrelated providers
