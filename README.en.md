@@ -92,6 +92,8 @@ budgets, task set, exclusions, and analysis plan were frozen before collection.
 
 ## Reproducibility and safety
 
+See [Reliable pairing](docs/analysis-pairing.md) before analyzing repeated runs.
+
 See [Reproducibility](docs/reproducibility.md) for the artifact workflow and
 [Security Policy](SECURITY.md) for credential and execution constraints. The
 harness is not a hardened sandbox and must not run untrusted model-generated

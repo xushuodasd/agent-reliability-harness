@@ -2,6 +2,8 @@
 
 [English](README.en.md) | 中文
 
+重复实验分析前请阅读[可靠配对与统计限制](docs/analysis-pairing.md)。
+
 [![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22306201.svg)](https://doi.org/10.5281/zenodo.22306201)
 

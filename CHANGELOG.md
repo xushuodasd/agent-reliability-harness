@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Fixed order-dependent engineering pairing: repeated observations require
+  explicit matched `pair_id` values; ambiguous, duplicate or mismatched rows fail.
+- Reject nonbinary outcomes and empty/self contrasts; exclude unrelated providers
+  from contrast reports. Added pairing regression tests and bilingual guidance.
 - Added Zenodo concept and version DOI metadata.
 - Updated the JOSS paper structure and AI-use disclosure for the 2026 guidance.
 - Published sanitized exploratory provider-validation results, governance, and a

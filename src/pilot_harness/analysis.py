@@ -12,10 +12,16 @@ from typing import Iterable
 ENGINEERING_NOTICE = "仅用于确定性模拟实验的工程验证，不构成真实模型能力或科学结论。"
 
 
+def _binary(value: object) -> int:
+    if type(value) not in (bool, int) or value not in (0, 1):
+        raise ValueError("success must be a boolean or integer 0/1")
+    return int(value)
+
+
 def stratified_success_rates(results: Iterable[dict]) -> dict[str, dict]:
     groups: dict[tuple[str, str], list[bool]] = defaultdict(list)
     for row in results:
-        groups[(row["provider"], row["fault"])].append(bool(row["success"]))
+        groups[(row["provider"], row["fault"])].append(bool(_binary(row["success"])))
     return {
         f"{provider}|{fault}": {
             "episodes": len(values),
@@ -28,27 +34,30 @@ def stratified_success_rates(results: Iterable[dict]) -> dict[str, dict]:
 
 def _paired_outcomes(results: Iterable[dict], baseline: str, treatment: str,
                      fault: str | None = None) -> list[tuple[int, int]]:
-    """Pair by task, fault, and stable within-cell occurrence index."""
-    cells: dict[tuple[str, str, str], list[int]] = defaultdict(list)
-    for row in results:
-        if row["provider"] not in (baseline, treatment) or (
-            fault is not None and row["fault"] != fault
-        ):
-            continue
-        cells[(row["task_id"], row["fault"], row["provider"])].append(
-            int(bool(row["success"]))
-        )
+    """Pair by explicit pair_id; legacy input permits one outcome per cell."""
+    selected = [row for row in results if row["provider"] in (baseline, treatment)
+                and (fault is None or row["fault"] == fault)]
+    explicit = any("pair_id" in row for row in selected)
+    cells: dict[tuple[str, str, str], dict[str, int]] = defaultdict(dict)
+    for row in selected:
+        pair_id = row.get("pair_id") if explicit else "__single__"
+        if not isinstance(pair_id, str) or not pair_id.strip():
+            raise ValueError("every selected outcome must have a nonempty string pair_id")
+        cell = cells[(row["task_id"], row["fault"], row["provider"])]
+        if pair_id in cell:
+            raise ValueError("duplicate pair cell; repeated outcomes require unique pair_id values")
+        cell[pair_id] = _binary(row["success"])
     strata = sorted({(task, condition) for task, condition, _ in cells})
     pairs: list[tuple[int, int]] = []
     for task, condition in strata:
-        base = cells.get((task, condition, baseline), [])
-        treated = cells.get((task, condition, treatment), [])
-        if len(base) != len(treated) or not base:
+        base = cells.get((task, condition, baseline), {})
+        treated = cells.get((task, condition, treatment), {})
+        if base.keys() != treated.keys() or not base:
             raise ValueError(
                 f"unbalanced pair cell task={task!r}, fault={condition!r}: "
                 f"{baseline}={len(base)}, {treatment}={len(treated)}"
             )
-        pairs.extend(zip(base, treated))
+        pairs.extend((base[key], treated[key]) for key in sorted(base))
     if not pairs:
         raise ValueError("no paired outcomes found for the selected providers")
     return pairs
@@ -67,7 +76,9 @@ def paired_risk_difference(pairs: list[tuple[int, int]], *, samples: int = 10_00
     """Treatment-minus-baseline RD with a paired percentile bootstrap CI."""
     if samples < 1:
         raise ValueError("samples must be at least 1")
-    differences = [treatment - baseline for baseline, treatment in pairs]
+    if not pairs:
+        raise ValueError("at least one outcome pair is required")
+    differences = [_binary(treatment) - _binary(baseline) for baseline, treatment in pairs]
     estimate = sum(differences) / len(differences)
     rng = random.Random(seed)
     bootstrap = sorted(
@@ -86,7 +97,12 @@ def paired_risk_difference(pairs: list[tuple[int, int]], *, samples: int = 10_00
 
 def analyze(summary: dict, baseline: str, treatment: str, *, samples: int = 10_000,
             seed: int = 20260904) -> dict:
-    results = summary.get("results", [])
+    if baseline == treatment:
+        raise ValueError("baseline and treatment must be different")
+    results = [row for row in summary.get("results", [])
+               if row["provider"] in (baseline, treatment)]
+    # Validate all selected rows together, including mixed pair_id policies.
+    overall_pairs = _paired_outcomes(results, baseline, treatment)
     effects = {
         fault: paired_risk_difference(
             _paired_outcomes(results, baseline, treatment, fault), samples=samples, seed=seed
@@ -94,7 +110,7 @@ def analyze(summary: dict, baseline: str, treatment: str, *, samples: int = 10_0
         for fault in sorted({row["fault"] for row in results})
     }
     effects["__overall__"] = paired_risk_difference(
-        _paired_outcomes(results, baseline, treatment), samples=samples, seed=seed
+        overall_pairs, samples=samples, seed=seed
     )
     return {
         "notice": ENGINEERING_NOTICE,
