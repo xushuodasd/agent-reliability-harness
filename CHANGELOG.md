@@ -4,6 +4,9 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Implemented a standalone SQLite dispatch diagnostic with blinded commit faults,
+  stale queries, idempotency, independent side-effect scoring, persistent attempt
+  budgets, four scripted policies, 48-cell acceptance and 14 regression tests.
 - Added a version-pinned related-work source audit and an explicitly unimplemented
   development specification for stale-query and duplicate-side-effect diagnostics.
 - Added plan-joined, task-weighted cluster bootstrap analysis with explicit

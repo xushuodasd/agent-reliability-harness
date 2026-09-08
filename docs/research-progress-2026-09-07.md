@@ -3,7 +3,30 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-08
+## 最新接续：2026-09-08 持久副作用开发轮
+
+- 前次提交 `9a7784d` 的
+  [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34176045504)
+  已复核为 completed / success。
+- 已实现[独立持久副作用诊断](dispatch-diagnostic.md)：一个本地投递模板、SQLite
+  追加事件、提交前/后盲化超时、一次滞后查询、可开关幂等契约和四个 scripted 策略。
+- 完成、重复/无关副作用及策略自报结果独立评分；底层重试共用持久预算，数据库
+  重开后预算、故障状态、查询滞后状态与事件保持一致。没有真实业务投递。
+- 120 项单元测试全部通过，其中新增 14 项；完整 48 配置验收零失败，保留所有
+  未完成/不确定和重复副作用配置。Windows 测试初次发现连接关闭晚于临时目录清理，
+  已修复清理顺序并通过回归，没有改写历史实验数据。
+- 最新本地证据：`runs/dispatch-diagnostic-20260908-plan-recorded/`，含执行前计划、
+  总表、48 个独立数据库和逐次证据。源码 SHA-256：
+  `d6baf7e0be503d64909a89adb3a67d356770c699f4aeee240c6e9e38c922e977`。
+  之前两个开发输出目录仍保留；后续运行是添加计数/自报断言及计划溯源后的工程复验，
+  不选择性重采样，不属于模型实验。`runs/` 是本地忽略目录，公开复现依据为代码和测试。
+- 人工构造的工程反例得到预期结果：提交后超时、无幂等时，查后重试在 fresh 查询下
+  无重复，在 lagged_once 下出现一次重复；不能把它解释为真实模型优劣或新颖性证明。
+- 下一轮：审查新模板接入统一工具、故障与证据封存接口；保持旧任务结果不变。
+  更多独立结构、LLM 重规划基线、累计付费预算与正式统计协议仍未完成。
+  本轮没有启动真实模型实验、付费调用或投稿。
+
+## 上轮记录：2026-09-08 文献核查
 
 - 当前代码提交 `22c9f6505021a0df3fef1eb17fbd0ea409b4cf7c` 的
   [GitHub CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34073412632)
@@ -77,6 +100,8 @@ python scripts/blinded_timeout_demo.py --output runs/blinded-timeout-demo
 - [x] 完成一轮方法章节与关键源码的定向核查，详见 2026-09-08 接续。
 - [ ] 补查同类 reconciliation engine、未定位源码与外部材料许可；当前并非全面新颖性证明。
 - [ ] 增加不同结构、具备真实副作用风险的任务模板，而不是只改数值和名称。
+      已添加独立的 `dispatch.append_only_effect` 开发诊断，尚未接入正式目录，
+      更不能把其 48 配置计作 48 个独立结构。
 - [ ] 引入至少一个外部公开任务来源并核查许可；按模板划分开发与留出任务。
 - [ ] 明确实现直接执行、固定重试、状态核验、重规划基线和关键组件消融。
 - [ ] 核查共享 provider 的预算重置、累计预算上限、断点续跑和供应商异常归因。

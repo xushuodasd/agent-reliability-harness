@@ -13,6 +13,9 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
 
 ## Research validation
 
+- Adapt the tested [standalone dispatch diagnostic](docs/dispatch-diagnostic.md)
+  to unified evidence interfaces without conflating scripted checks with model
+  measurements; add structurally distinct tasks before scaling repetitions.
 - Use the [2026-09-08 source audit](docs/related-work-audit-2026-09-08.md) and
   [development acceptance specification](docs/ambiguous-commit-study-design.md)
   to test commit ambiguity, stale queries, and persistent side effects before

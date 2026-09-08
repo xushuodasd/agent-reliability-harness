@@ -7,6 +7,9 @@
 正式研究准备见[2026-09-07研究审计与待办](docs/research-progress-2026-09-07.md)，
 新增[按冻结计划进行聚类分析](docs/cluster-analysis.md)，保留缺失运行和未知结果范围。
 
+[持久副作用诊断](docs/dispatch-diagnostic.md)提供 48 配置的离线 scripted 验收，
+用于检查查询滞后、重复执行和预算计量；尚未接入统一引擎，不是模型实验结果。
+
 [![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22306201.svg)](https://doi.org/10.5281/zenodo.22306201)
 

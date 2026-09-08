@@ -2,6 +2,10 @@
 
 English | [中文](README.md)
 
+The [persistent-effect diagnostic](docs/dispatch-diagnostic.md) provides a
+standalone 48-cell scripted check of stale reads, duplicate effects and metering.
+It is not yet integrated with the unified engine and is not live-model evidence.
+
 [![tests](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/xushuodasd/agent-reliability-harness/actions/workflows/tests.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22306201.svg)](https://doi.org/10.5281/zenodo.22306201)
 
