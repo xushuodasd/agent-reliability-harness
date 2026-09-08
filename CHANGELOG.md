@@ -4,6 +4,8 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Added a version-pinned related-work source audit and an explicitly unimplemented
+  development specification for stale-query and duplicate-side-effect diagnostics.
 - Added plan-joined, task-weighted cluster bootstrap analysis with explicit
   missing-run counts and unknown-outcome bounds.
 - Blinded pre-execution and post-commit timeout observations; post-commit faults

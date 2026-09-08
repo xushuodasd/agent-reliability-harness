@@ -13,6 +13,10 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
 
 ## Research validation
 
+- Use the [2026-09-08 source audit](docs/related-work-audit-2026-09-08.md) and
+  [development acceptance specification](docs/ambiguous-commit-study-design.md)
+  to test commit ambiguity, stale queries, and persistent side effects before
+  claiming a contribution or collecting live-model results.
 - Follow the [2026-09-07 research audit](docs/research-progress-2026-09-07.md):
   prioritize independent task structures, blinded commit ambiguity, matched
   baselines and cluster-aware analysis before scaling paid runs.
