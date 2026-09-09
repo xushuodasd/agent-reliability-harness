@@ -14,6 +14,8 @@ from itertools import product
 from pathlib import Path
 from typing import Callable
 
+from .manifests import verify_manifest, write_manifest
+
 FAULTS = ("clean", "timeout_before_commit", "timeout_after_commit")
 VISIBILITY = ("fresh", "lagged_once")
 POLICIES = ("once", "retry_once", "lookup_then_retry", "bounded_reconcile")
@@ -215,13 +217,27 @@ def run_policy(name: str, call: Callable, idempotent: bool,
             ("uncertain" if result == TIMEOUT else "failed")}
 
 
+def design_cells() -> list[dict]:
+    return [{"episode_id": f"{fault}-{visibility}-{int(idempotent)}-{policy}",
+              "config": asdict(Config(fault, visibility, idempotent)), "policy": policy}
+             for fault, visibility, idempotent, policy in product(FAULTS, VISIBILITY, (False, True), POLICIES)]
+
+
+def required_evidence_paths() -> list[str]:
+    return ["plan.json", "summary.json"] + [f"{cell['episode_id']}/{name}"
+            for cell in design_cells() for name in ("effects.sqlite3", "evidence.json")]
+
+
+def verify_dispatch_manifest(output: Path) -> tuple[bool, list[str]]:
+    """Read-only byte-integrity check against this diagnostic's 98-file boundary."""
+    return verify_manifest(output / "manifest.json", required_artifacts=required_evidence_paths())
+
+
 def run_matrix(output: Path) -> dict:
     """Run all planned cells once; preserve even failed assertion evidence."""
     output.mkdir(parents=True, exist_ok=False)
     source_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-    cells = [{"episode_id": f"{fault}-{visibility}-{int(idempotent)}-{policy}",
-              "config": asdict(Config(fault, visibility, idempotent)), "policy": policy}
-             for fault, visibility, idempotent, policy in product(FAULTS, VISIBILITY, (False, True), POLICIES)]
+    cells = design_cells()
     with (output / "plan.json").open("x", encoding="utf-8") as stream:
         json.dump({"schema_version": "dispatch-diagnostic-plan/1", "data_origin": "scripted_fixture",
                    "implementation_sha256": source_hash, "episodes": cells}, stream, indent=2)
@@ -259,6 +275,13 @@ def run_matrix(output: Path) -> dict:
                "episodes": rows, "acceptance_failures": failures}
     with (output / "summary.json").open("x", encoding="utf-8") as stream:
         json.dump(summary, stream, indent=2)
+    write_manifest(output, [output / name for name in required_evidence_paths()], metadata={
+        "data_origin": "scripted_fixture", "diagnostic_schema": "dispatch-diagnostic/1",
+        "implementation_sha256": source_hash, "planned_episodes": len(cells),
+        "acceptance_passed": not failures})
+    valid, errors = verify_dispatch_manifest(output)
+    if not valid:
+        raise AssertionError("Diagnostic evidence integrity failed: " + "; ".join(errors))
     if failures:
         raise AssertionError(f"Diagnostic acceptance failed; inspect {output / 'summary.json'}")
     return summary
@@ -317,8 +340,16 @@ def validate_matrix(rows: list[dict]) -> list[str]:
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, required=True)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--output", type=Path)
+    mode.add_argument("--verify", type=Path, help="Read-only integrity check; does not run episodes")
     args = parser.parse_args(argv)
+    if args.verify is not None:
+        valid, errors = verify_dispatch_manifest(args.verify)
+        print(json.dumps({"byte_integrity_valid": valid, "errors": errors}))
+        if not valid:
+            parser.exit(1)
+        return
     summary = run_matrix(args.output)
     print(json.dumps({"data_origin": summary["data_origin"], "episodes": len(summary["episodes"]),
                       "acceptance_failures": summary["acceptance_failures"]}))

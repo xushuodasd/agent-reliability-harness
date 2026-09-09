@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pilot_harness.dispatch_diagnostic import (
     Config, DispatchDiagnostic, TIMEOUT, run_matrix, run_policy, score, validate_matrix,
+    verify_dispatch_manifest,
 )
 
 
@@ -186,6 +187,19 @@ class DispatchDiagnosticTests(unittest.TestCase):
                          [r["episode_id"] for r in result["episodes"]])
         self.assertEqual(len(list(folder.glob("*/effects.sqlite3"))), 48)
         self.assertEqual(len(list(folder.glob("*/evidence.json"))), 48)
+        self.assertEqual(verify_dispatch_manifest(folder), (True, []))
+        manifest_path = folder / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(len(manifest["artifacts"]), 98)
+        removed = manifest["artifacts"].pop(0)
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        self.assertFalse(verify_dispatch_manifest(folder)[0])
+        manifest["artifacts"].insert(0, removed)
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        evidence_path = next(folder.glob("*/evidence.json"))
+        with evidence_path.open("a", encoding="utf-8") as stream:
+            stream.write(" ")
+        self.assertFalse(verify_dispatch_manifest(folder)[0])
         self.assertTrue(validate_matrix(result["episodes"][:-1]))
         corrupted = json.loads(json.dumps(result["episodes"]))
         corrupted[0]["score"]["duplicate_effects"] = 99

@@ -10,14 +10,20 @@
 
 ```shell
 python -m pilot_harness.dispatch_diagnostic --output runs/dispatch-diagnostic-example
+python -m pilot_harness.dispatch_diagnostic --verify runs/dispatch-diagnostic-example
 python -m unittest discover -s tests -p test_dispatch_diagnostic.py -v
 ```
 
 执行前先保存完整 48 配置的 `plan.json`；每个 episode 保留 `effects.sqlite3` 和
 `evidence.json`；总表为 `summary.json`。中途中断时，可按计划识别未完成配置。
+自 2026-09-09 起，完整运行还使用统一的 manifest 模块封存上述 98 个文件，
+并按代码定义的必需文件集合核验。`--verify` 仅读取文件，不重跑、不补写清单；
+旧的未封存输出会核验失败，不能暗中给旧证据补盖“通过”标记。
 总表包含源码 SHA-256、48 个配置、策略自报状态、独立评分、调用计数、数据库重开
 一致性检查，以及 `acceptance_failures`。任何验收失败先保存总表，再以错误退出。
 运行过程异常会中止并保留已有文件，不自动重跑；目前不支持矩阵断点续跑。
+若矩阵验收断言失败，仍保留总表与清单，且命令非零退出。**字节完整性通过不等于
+实验验收通过**：还须查看 `acceptance_failures`；只读命令不重新计算评分或运行策略。
 
 源码：[`dispatch_diagnostic.py`](../src/pilot_harness/dispatch_diagnostic.py)。
 测试：[`test_dispatch_diagnostic.py`](../tests/test_dispatch_diagnostic.py)。
@@ -52,15 +58,18 @@ python -m unittest discover -s tests -p test_dispatch_diagnostic.py -v
 **限制：** SQLite 文件不是防篡改存储；有文件权限的程序仍能更改证据。Python
 调用接口不是进程安全隔离。证据导出是单进程静止后的快照，不承诺并发分析一致性。
 尚未验证进程强杀、网络分区、跨主机一致性、多步骤恢复或完整 agent 检查点；
-也没有接入统一引擎的哈希链/封存机制。不得将数据库重开检查描述成端到端崩溃恢复。
-源码哈希是溯源标识，不是数字签名或防篡改保证。
+已复用统一 manifest 封存模块，但尚未接入统一引擎的运行适配与事件哈希链。
+不得将数据库重开检查描述成端到端崩溃恢复。清单、源码哈希均不是数字签名；
+同时修改证据和清单仍可逃过字节校验。源码哈希仅覆盖诊断模块，不是全部依赖快照。
 
 ## English summary
 
 This standalone, scripted diagnostic exercises durable local delivery effects,
 blinded before/after-commit timeouts, stale reads and idempotency. It runs all
-48 engineering cells and retains failures, independent effect scores, metering
-and reopen checks. It makes no model-performance or novelty claim. It is not yet
+48 engineering cells and retains failures, independent effect scores, metering,
+reopen checks and a shared artifact manifest. The read-only `--verify` command
+checks the required 98-file boundary and byte integrity, not scientific validity.
+It makes no model-performance or novelty claim. It is not yet
 integrated with the unified engine, confirmatory analysis or agent checkpoint
 recovery. Use the command above with a new output directory; inspect both the
 SQLite ledger and JSON evidence. Existing directories are never overwritten.

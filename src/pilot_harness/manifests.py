@@ -5,8 +5,10 @@ import json
 import os
 import tempfile
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Iterable
+
+from .runtime_schema import SchemaRegistry, SchemaViolation
 
 
 MANIFEST_SCHEMA_VERSION = "pilot-run-manifest/1"
@@ -89,29 +91,60 @@ def write_manifest(
     return target
 
 
-def verify_manifest(path: Path) -> tuple[bool, list[str]]:
-    """Verify every declared artifact; return a status and actionable errors."""
+def _canonical_artifact_path(value: str) -> bool:
+    return (bool(value) and "\\" not in value and ":" not in value and "\x00" not in value
+            and not PurePosixPath(value).is_absolute()
+            and value == PurePosixPath(value).as_posix()
+            and ".." not in PurePosixPath(value).parts and value not in (".", "manifest.json"))
+
+
+def verify_manifest(path: Path, *, required_artifacts: Iterable[str] | None = None) -> tuple[bool, list[str]]:
+    """Verify structure, declared files and optionally a caller-owned boundary.
+
+    Without required_artifacts, this cannot detect an omitted declaration.
+    Hashes are integrity checks, not signatures or evidence of scientific truth.
+    """
     try:
         manifest = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        SchemaRegistry(Path(__file__).parent / "schemas").validate(manifest, "manifest.schema.json")
+    except (OSError, UnicodeError, json.JSONDecodeError, SchemaViolation) as exc:
         return False, [str(exc)]
     errors: list[str] = []
-    if manifest.get("schema_version") != MANIFEST_SCHEMA_VERSION:
-        errors.append("unsupported manifest schema_version")
     run_dir = path.parent.resolve()
-    for artifact in manifest.get("artifacts", []):
-        relative = artifact.get("path", "")
-        candidate = (run_dir / relative).resolve()
+    declared: set[str] = set()
+    resolved: set[Path] = set()
+    for artifact in manifest["artifacts"]:
+        relative = artifact["path"]
+        if not _canonical_artifact_path(relative):
+            errors.append(f"noncanonical artifact path: {relative}")
+            continue
+        if relative in declared:
+            errors.append(f"duplicate artifact: {relative}")
+            continue
+        declared.add(relative)
         try:
+            candidate = (run_dir / relative).resolve()
             candidate.relative_to(run_dir)
+            if candidate in resolved:
+                errors.append(f"duplicate resolved artifact: {relative}")
+                continue
+            resolved.add(candidate)
+            if not candidate.is_file():
+                errors.append(f"missing artifact: {relative}")
+                continue
+            if candidate.stat().st_size != artifact["size_bytes"]:
+                errors.append(f"size mismatch: {relative}")
+            if sha256_file(candidate) != artifact["sha256"]:
+                errors.append(f"sha256 mismatch: {relative}")
         except ValueError:
             errors.append(f"artifact escapes run directory: {relative}")
-            continue
-        if not candidate.is_file():
-            errors.append(f"missing artifact: {relative}")
-            continue
-        if candidate.stat().st_size != artifact.get("size_bytes"):
-            errors.append(f"size mismatch: {relative}")
-        if sha256_file(candidate) != artifact.get("sha256"):
-            errors.append(f"sha256 mismatch: {relative}")
+        except (OSError, RuntimeError) as exc:
+            errors.append(f"unreadable artifact: {relative} ({type(exc).__name__})")
+    if isinstance(required_artifacts, str):
+        return False, errors + ["required_artifacts must be an iterable of paths, not a string"]
+    for required in required_artifacts or ():
+        if not isinstance(required, str) or not _canonical_artifact_path(required):
+            errors.append("invalid required artifact path")
+        elif required not in declared:
+            errors.append(f"required artifact not declared: {required}")
     return not errors, errors

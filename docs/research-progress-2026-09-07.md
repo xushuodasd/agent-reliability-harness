@@ -3,7 +3,26 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-08 持久副作用开发轮
+## 最新接续：2026-09-09 证据封存轮
+
+- 前次提交 `554d3ff` 的
+  [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34179275537)
+  已在线复核为 completed / success；本轮开始工作区干净。
+- 集成前发现基础 manifest 校验可能接受空清单，且无法发现被删除的文件声明。
+  已加入结构验证、重复/非法路径检查、读取异常处理和独立必需文件集合，详见
+  [证据完整性边界](manifest-integrity.md)。不将未签名清单当防篡改证明。
+- 诊断已复用统一 manifest 模块封存 98 个文件，新增 `--verify` 只读校验模式。
+  尚未接入统一运行状态机、事件哈希链或正式统计分析；这是证据接口接入的第一步。
+- 本轮 126 项单元测试通过，含 6 项新增清单边界测试及已有矩阵测试的漏报/篡改检查；
+  新目录 `runs/dispatch-diagnostic-20260909-manifest/` 的 48 配置验收零失败，98 文件
+  字节及必需文件校验通过。旧输出未改动；没有付费模型调用或论文实测结果。
+- 诊断源码 SHA-256：
+  `7a3ec24710ee69db89a8ae4ed78921a9d0867fffe18a862b51448f1ec2e50063`。
+  此哈希仅覆盖诊断模块；完整代码版本以后续 Git 提交为准。
+- 下一轮：为统一引擎定义不混淆“完成/安全/停止”的 dispatch 适配与证据语义联接；
+  仍需避免双重故障注入、隐藏内部重试预算和把旧多维 outcome 当独立测量。
+
+## 上轮记录：2026-09-08 持久副作用开发轮
 
 - 前次提交 `9a7784d` 的
   [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34176045504)

@@ -4,6 +4,9 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Hardened manifest verification with schema checks, canonical unique paths and
+  optional independently required artifacts. Dispatch diagnostics now seal 98
+  required files and offer read-only `--verify` integrity checks.
 - Implemented a standalone SQLite dispatch diagnostic with blinded commit faults,
   stale queries, idempotency, independent side-effect scoring, persistent attempt
   budgets, four scripted policies, 48-cell acceptance and 14 regression tests.
