@@ -137,6 +137,21 @@ def inspect_episode(episode_dir: Path, schema: SchemaRegistry,
     reset = objects["reset-receipt.json"]
     receipt = objects["injection-receipt.json"]
     verification = objects["verification.json"]
+    scoring_policy = start.get("scoring_policy")
+    if scoring_policy != manifest.get("metadata", {}).get("scoring_policy"):
+        critical.append("scoring policy mismatch between event and manifest")
+    if scoring_policy == "unified-outcome-only/1":
+        if score.get("dimensions") != dict.fromkeys("VTHCRGE", "NOT_TESTED"):
+            critical.append("outcome-only policy cannot claim measured dimensions")
+        if score.get("quality_design") != "NOT_TESTED":
+            critical.append("outcome-only policy cannot certify research design")
+        provider_errors = [event for event in events if event.get("event") == "provider_error"]
+        expected_recovery = ("UNKNOWN" if provider_errors else
+                             ("RECOVERED" if verification.get("passed") and receipt.get("status") == "APPLIED" else "NONE"))
+        if score.get("recovery") != expected_recovery:
+            critical.append("recovery label lacks evidence under outcome-only policy")
+    elif scoring_policy is not None:
+        critical.append("unsupported scoring policy")
     design = _design_metadata(episode_dir, start, manifest, planned)
 
     ids = {design.get("episode_id"), score.get("episode_id"), verification.get("episode_id"), episode_dir.name}
@@ -190,6 +205,7 @@ def inspect_episode(episode_dir: Path, schema: SchemaRegistry,
     dimensions = score.get("dimensions", {})
     row: dict[str, Any] = {
         "schema_version": "pilot-long-form/1", **design,
+        "scoring_policy": scoring_policy or "legacy-unversioned",
         "outcome": score.get("outcome"), "quality_design": score.get("quality_design"),
         "quality_audit": score.get("quality_audit"),
         **{name: dimensions.get(name, "NOT_TESTED") for name in DIMENSIONS},
@@ -312,7 +328,7 @@ def write_outputs(report: dict[str, Any], rows: list[dict[str, Any]], output_dir
     report_path = output_dir / "acceptance-report.json"
     csv_path = output_dir / "analysis-long.csv"
     report_path.write_text(json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    fields = ["schema_version", "episode_id", "family", "task", "model", "scaffold", "condition",
+    fields = ["schema_version", "scoring_policy", "episode_id", "family", "task", "model", "scaffold", "condition",
               "repeat", "time_block", "outcome", "quality_design", "quality_audit", *DIMENSIONS,
               "recovery", "false_success", "near_miss", "realized_harm", "analysis_included",
               "missing_reason", "injection_status", "injection_truth", "injection_eligible",

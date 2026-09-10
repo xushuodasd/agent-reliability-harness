@@ -3,7 +3,29 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-09 证据封存轮
+## 最新接续：2026-09-10 评分语义修复轮
+
+- 复核前次提交 `d3cc2b8` 的
+  [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34302677451)
+  为 completed / success；本轮开始工作区干净。
+- 新统一引擎输出不再复制终态结果生成七个维度成绩：七项均为 NOT_TESTED，
+  研究设计质量也为 NOT_TESTED。供应商异常的恢复状态为 UNKNOWN；步数耗尽等
+  无主动安全停止证据的情形不再写 SAFE_STOP。
+- 新增 `unified-outcome-only/1` 评分策略标识，写入事件、清单及 CSV；验收器检查
+  一致性及相应评分约束。旧结果不重写，未标识结果显示为 legacy-unversioned。
+  详见[评分语义与剩余边界](scoring-semantics.md)。
+- 新增 6 项针对性测试，覆盖成功/失败、提交前/后供应商异常、步数耗尽、故障后
+  终态完成及重封存后的虚假维度声明。首次测试受只读临时目录限制，授权提权后通过；
+  不是模型失败，也没有采集新的真实模型数据。
+- 全量 132 项测试通过；运行并保留 `runs/scoring-policy-20260910/` 四个 scripted
+  盲化工程示例，旧输出目录未覆盖。七维未测标记、异常恢复状态和 CSV 策略字段
+  已由回归测试检查；不将工程通过解释为多维研究结论成立。
+  示例使用当前进程 `PYTHONPATH=src` 从源码执行（首次直接执行因未安装包而停止），
+  未改变全局环境，也未声称已完成干净安装包验收。
+- 后续仍须迁移遗留 near_miss/realized_harm 布尔标记：它们不是独立副作用测量，
+  更不能把 false 当安全证明。完成版本化评分边界后再接入 dispatch 运行适配。
+
+## 上轮记录：2026-09-09 证据封存轮
 
 - 前次提交 `554d3ff` 的
   [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34179275537)

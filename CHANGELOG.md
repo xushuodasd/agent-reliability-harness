@@ -4,6 +4,9 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Marked unmeasured unified dimensions and research-design quality NOT_TESTED;
+  provider failures now have UNKNOWN recovery and step-limit stops are not SAFE_STOP.
+  Added an explicit scoring-policy marker, acceptance checks and CSV provenance.
 - Hardened manifest verification with schema checks, canonical unique paths and
   optional independently required artifacts. Dispatch diagnostics now seal 98
   required files and offer read-only `--verify` integrity checks.

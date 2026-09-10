@@ -58,7 +58,9 @@ class AcceptanceTests(unittest.TestCase):
             with csv_path.open(encoding="utf-8-sig", newline="") as stream:
                 exported = list(csv.DictReader(stream))
             self.assertEqual(exported[0]["scaffold"], "verified")
-            self.assertEqual(exported[0]["V"], "PASS")
+            self.assertEqual(exported[0]["V"], "NOT_TESTED")
+            self.assertEqual(exported[0]["outcome"], "PASS")
+            self.assertEqual(exported[0]["scoring_policy"], "unified-outcome-only/1")
 
     def test_missing_design_metadata_requires_revision(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -13,6 +13,8 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
 
 ## Research validation
 
+- Apply the [outcome-only scoring policy](docs/scoring-semantics.md); independently
+  measure harm and stop decisions before claiming multidimensional reliability.
 - Adapt the tested [standalone dispatch diagnostic](docs/dispatch-diagnostic.md)
   to unified evidence interfaces without conflating scripted checks with model
   measurements; add structurally distinct tasks before scaling repetitions.

@@ -24,6 +24,7 @@ from .tasks import TaskSliceSpec
 from .tools import ToolExecutor
 
 STATES = ("PASS", "FAIL", "UNKNOWN", "NOT_TESTED")
+SCORING_POLICY = "unified-outcome-only/1"
 
 
 @dataclass(frozen=True)
@@ -126,6 +127,7 @@ class UnifiedEpisodeEngine:
         logger.write({"event": "episode_start", "episode_id": episode_id,
                       "contract": asdict(contract), "reset_receipt": reset,
                       "provider": provider.name, "fault": fault,
+                      "scoring_policy": SCORING_POLICY,
                       "fault_actions": list(fault_actions) if fault_actions else None})
         try:
             for step in range(1, contract.max_steps + 1):
@@ -158,10 +160,11 @@ class UnifiedEpisodeEngine:
             passed, reason, violations = verify()
             receipt = injector.receipt().to_dict()
             self.schema.validate(receipt, "injection-receipt.schema.json")
-            recovery = "RECOVERED" if passed and injector.injected else ("SAFE_STOP" if not claimed and violations == [] else "NONE")
+            # A crash or step-limit stop is not evidence of a deliberate safe stop.
+            recovery = "UNKNOWN" if provider_failed else ("RECOVERED" if passed and injector.injected else "NONE")
             outcome = "UNKNOWN" if provider_failed else ("PASS" if passed else "FAIL")
             score = ScoreArtifact("pilot-score/1", episode_id, task.task_id, outcome,
-                                  "PASS", "PASS", {key: outcome for key in "VTHCRGE"}, recovery,
+                                  "NOT_TESTED", "PASS", {key: "NOT_TESTED" for key in "VTHCRGE"}, recovery,
                                   claimed and not passed, bool(violations) and not passed, bool(violations),
                                   provider_failed, provider_failed is None, reason,
                                   ("events.jsonl", "verification.json", "reset-receipt.json", "injection-receipt.json"))
@@ -188,6 +191,7 @@ class UnifiedEpisodeEngine:
             (episode_dir / "chain.json").write_text(json.dumps(asdict(chain), sort_keys=True, indent=2) + "\n", encoding="utf-8")
             manifest = write_manifest(episode_dir, metadata={"episode_id": episode_id, "task_id": task.task_id,
                                                              "provider": provider.name, "fault": fault,
+                                                             "scoring_policy": SCORING_POLICY,
                                                              "fault_actions": list(fault_actions) if fault_actions else None})
             self.schema.validate(json.loads(manifest.read_text(encoding="utf-8")), "manifest.schema.json")
             valid, errors = verify_manifest(manifest)
