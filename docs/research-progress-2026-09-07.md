@@ -3,7 +3,31 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-10 评分语义修复轮
+## 最新接续：2026-09-12 安全缺失值版本化收尾
+
+- 复核基线 `0f4b022` 的
+  [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34445433460)
+  为 completed / success。本轮接续上次未提交的三个源码修改及两份新评分 schema，
+  没有清除工作区或覆盖历史数据。初始 132 项测试中只有旧 GO 预期失败，已按新契约修正。
+- 新统一引擎采用 `pilot-score/2` / `unified-outcome-only/2`：near_miss 与 realized_harm
+  为 null，safety_evidence 为 NOT_TESTED。正式验收缺少独立安全证据时 REVISE；
+  工程演练提示 INFO；空批次不通过安全门。违规尝试仍独立 STOP，不等同于实测伤害。
+- 旧 v1 schema 与历史产物保持不动；读取时标记 LEGACY_PROXY，阳性代理标记仍要求检查，
+  但不计为实测伤害。新版长表/CSV 与验收报告也升至 v2，明确破坏性字段变化。
+  详见[评分语义与读取约定](scoring-semantics.md)。没有测量分母时不能宣称“零伤害”。
+- 按 implement / code-review 技能完成小范围实施和两条独立审查：Standards 轴指出长表
+  类型变化需升版本；Spec 轴指出被拒绝的 MEASURED 声明仍可能进入测量分母。两项均已
+  修正并增加断言：无效测量导出 INVALID，不进入已测量数量，整体验收仍 STOP。
+- 离线全量 142 项测试通过（比基线增加 10 项）；四个新盲化超时示例保存在
+  `runs/safety-state-20260912/`，均通过评分 v2、null 状态、事件链及 manifest 复核。
+  这些是 scripted 工程夹具，不是 LLM 实验结果；没有真实外发、付费调用或选择性补跑。
+- 仍未完成：dispatch 与统一运行状态机的独立副作用评分适配、更多独立任务结构、
+  公平基线与累计付费预算、正式协议冻结。下一轮先把 dispatch 的独立计数接到证据接口，
+  不把普通终态验证转换为安全证明；满足设计和预算前置条件后才考虑真实模型诊断。
+- 本次修改的远端 CI 应按提交 SHA 在 Actions 核实；以上链接仅是已核实的上一版 CI，
+  不把本地测试通过当作本次远端验证。当前未投稿，未宣称新颖性成立或可以录用。
+
+## 历史接续：2026-09-10 评分语义修复轮
 
 - 复核前次提交 `d3cc2b8` 的
   [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34302677451)

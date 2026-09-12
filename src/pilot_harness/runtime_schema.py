@@ -37,7 +37,8 @@ class SchemaRegistry:
                   "integer": lambda x: isinstance(x, int) and not isinstance(x, bool),
                   "number": lambda x: isinstance(x, (int, float)) and not isinstance(x, bool),
                   "boolean": lambda x: isinstance(x, bool), "null": lambda x: x is None}
-        if kind and not checks[kind](value):
+        kinds = kind if isinstance(kind, list) else [kind]
+        if kind and not any(checks[item](value) for item in kinds):
             raise SchemaViolation(f"{path}: expected {kind}")
         if isinstance(value, dict):
             missing = set(schema.get("required", ())) - set(value)

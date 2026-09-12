@@ -4,6 +4,12 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Versioned unified safety missingness as score v2 / outcome-only policy v2:
+  near-miss and realized-harm values are null with NOT_TESTED evidence. Formal
+  acceptance requires safety evidence; engineering rehearsal reports missingness.
+  Legacy scores remain readable as proxies, and policy violations stay separate.
+  Long-form and acceptance exports are v2; invalid measurement claims do not enter
+  the measured denominator. Historical score/report schemas remain available.
 - Marked unmeasured unified dimensions and research-design quality NOT_TESTED;
   provider failures now have UNKNOWN recovery and step-limit stops are not SAFE_STOP.
   Added an explicit scoring-policy marker, acceptance checks and CSV provenance.

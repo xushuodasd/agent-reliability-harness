@@ -43,14 +43,19 @@ def make_episode(run_dir: Path, episode_id: str, complete_design: bool = True):
 
 
 class AcceptanceTests(unittest.TestCase):
-    def test_go_and_long_form_export(self):
+    def test_unmeasured_safety_requires_revision_and_exports_missing_values(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             make_episode(root, "ep-1")
             make_episode(root, "ep-2")
             write_manifest(root, metadata={"data_origin": "real_model"})
             report, rows = assess_batch(root, "M3", expected_episodes=2)
-            self.assertEqual(report["decision"], "GO")
+            self.assertEqual(report["decision"], "REVISE")
+            self.assertEqual(report["schema_version"], "pilot-acceptance/2")
+            safety = next(c for c in report["checks"] if c["check_id"] == "security_harm")
+            self.assertEqual(safety["status"], "REVISE")
+            self.assertEqual(safety["observed"]["unmeasured_safety"], 2)
+            self.assertEqual(safety["observed"]["measured_episodes"], 0)
             self.assertEqual(len(rows), 2)
             self.assertTrue(set(DIMENSIONS).issubset(rows[0]))
             report_path, csv_path = write_outputs(report, rows, root / "derived")
@@ -58,9 +63,14 @@ class AcceptanceTests(unittest.TestCase):
             with csv_path.open(encoding="utf-8-sig", newline="") as stream:
                 exported = list(csv.DictReader(stream))
             self.assertEqual(exported[0]["scaffold"], "verified")
+            self.assertEqual(exported[0]["schema_version"], "pilot-long-form/2")
             self.assertEqual(exported[0]["V"], "NOT_TESTED")
             self.assertEqual(exported[0]["outcome"], "PASS")
-            self.assertEqual(exported[0]["scoring_policy"], "unified-outcome-only/1")
+            self.assertEqual(exported[0]["scoring_policy"], "unified-outcome-only/2")
+            self.assertEqual(exported[0]["score_schema_version"], "pilot-score/2")
+            self.assertEqual(exported[0]["safety_evidence"], "NOT_TESTED")
+            self.assertEqual(exported[0]["near_miss"], "")
+            self.assertEqual(exported[0]["realized_harm"], "")
 
     def test_missing_design_metadata_requires_revision(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -90,8 +100,18 @@ class AcceptanceTests(unittest.TestCase):
             (root / "plan.json").write_text(json.dumps(plan), encoding="utf-8")
             report, rows = assess_batch(root, "M3", expected_episodes=1, require_real_model=False)
             self.assertEqual(report["decision"], "GO")
+            safety = next(c for c in report["checks"] if c["check_id"] == "security_harm")
+            self.assertEqual(safety["status"], "INFO")
             self.assertEqual(rows[0]["model"], "m1")
             self.assertEqual(rows[0]["repeat"], 1)
+
+    def test_empty_batch_cannot_pass_safety_gate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for formal in (False, True):
+                report, _ = assess_batch(Path(directory), "M3", expected_episodes=0,
+                                         require_real_model=formal)
+                safety = next(c for c in report["checks"] if c["check_id"] == "security_harm")
+                self.assertEqual(safety["status"], "REVISE" if formal else "INFO")
 
     def test_raw_canary_is_a_stop_even_with_resealed_manifest(self):
         with tempfile.TemporaryDirectory() as directory:

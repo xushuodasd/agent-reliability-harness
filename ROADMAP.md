@@ -15,6 +15,8 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
 
 - Apply the [outcome-only scoring policy](docs/scoring-semantics.md); independently
   measure harm and stop decisions before claiming multidimensional reliability.
+  Versioned null safety fields and missing-evidence acceptance gates are implemented;
+  independent safety measurements in the unified engine remain pending.
 - Adapt the tested [standalone dispatch diagnostic](docs/dispatch-diagnostic.md)
   to unified evidence interfaces without conflating scripted checks with model
   measurements; add structurally distinct tasks before scaling repetitions.

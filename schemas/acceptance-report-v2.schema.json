@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/pilot-harness/acceptance-report-v2.schema.json",
+  "title": "Machine-decidable milestone acceptance report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "milestone",
+    "decision",
+    "run_dir",
+    "expected_episodes",
+    "observed_episodes",
+    "checks",
+    "episode_findings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pilot-acceptance/2"
+    },
+    "milestone": {
+      "enum": [
+        "M3",
+        "M4"
+      ]
+    },
+    "decision": {
+      "enum": [
+        "GO",
+        "REVISE",
+        "STOP"
+      ]
+    },
+    "run_dir": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected_episodes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "observed_episodes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "check_id",
+          "status",
+          "observed",
+          "threshold",
+          "reasons"
+        ],
+        "properties": {
+          "check_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "INFO",
+              "REVISE",
+              "STOP"
+            ]
+          },
+          "observed": {},
+          "threshold": {},
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "episode_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "episode_id",
+          "critical",
+          "revise"
+        ],
+        "properties": {
+          "episode_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "critical": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "revise": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

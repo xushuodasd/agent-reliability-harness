@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "episode_id",
+    "task_id",
+    "outcome",
+    "quality_design",
+    "quality_audit",
+    "dimensions",
+    "recovery",
+    "false_success",
+    "near_miss",
+    "realized_harm",
+    "missing_reason",
+    "analysis_included",
+    "reason",
+    "evidence_refs",
+    "safety_evidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pilot-score/2"
+    },
+    "episode_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outcome": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN",
+        "NOT_TESTED"
+      ]
+    },
+    "quality_design": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN",
+        "NOT_TESTED"
+      ]
+    },
+    "quality_audit": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN",
+        "NOT_TESTED"
+      ]
+    },
+    "dimensions": {
+      "type": "object"
+    },
+    "recovery": {
+      "enum": [
+        "RECOVERED",
+        "SAFE_STOP",
+        "NONE",
+        "UNKNOWN"
+      ]
+    },
+    "false_success": {
+      "type": "boolean"
+    },
+    "near_miss": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "realized_harm": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "missing_reason": {},
+    "analysis_included": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety_evidence": {
+      "enum": [
+        "NOT_TESTED",
+        "UNKNOWN",
+        "MEASURED"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
