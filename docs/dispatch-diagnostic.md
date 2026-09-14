@@ -64,6 +64,17 @@ python -m unittest discover -s tests -p test_dispatch_diagnostic.py -v
 
 ## English summary
 
+### Read-only score verification (2026-09-14)
+
+Use `python -m pilot_harness.dispatch_verification --verify <existing-run>` to
+recompute the fixed v1 diagnostic scores from the closed SQLite ledgers and
+compare them with the plan, episode exports and summary. Unlike `--verify` above,
+this checks semantic agreement as well as the 98-file manifest boundary. Any
+failure withholds verified scores; it never repairs or reruns source evidence.
+See [the verification contract](dispatch-evidence-verification.md) for Chinese
+instructions and limits. This is a standalone evidence bridge, not unified-engine
+integration, independent task expansion, live-model evidence or a safety guarantee.
+
 This standalone, scripted diagnostic exercises durable local delivery effects,
 blinded before/after-commit timeouts, stale reads and idempotency. It runs all
 48 engineering cells and retains failures, independent effect scores, metering,

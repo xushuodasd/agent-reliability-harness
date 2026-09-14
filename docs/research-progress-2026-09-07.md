@@ -3,7 +3,32 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-12 安全缺失值版本化收尾
+## 最新接续：2026-09-14 副作用证据只读语义复核
+
+- 本轮开始工作区干净；基线 `57c4ede` 的
+  [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34691037534)
+  已复核 completed / success，初始 142 项离线测试全部通过。
+- 完成[副作用证据重算接口](dispatch-evidence-verification.md)：除原 98 文件字节校验，
+  逐项核对固定 48 配置的计划、来源/实现哈希、SQLite 账本、私有 JSON、计数、
+  episode 分数和 summary，重新执行工程预期检查。任何不一致均 INVALID，评分返回 null，
+  不把未知算成零、不修复源数据、不自动重跑。这是统一适配前的独立证据桥接步骤。
+- 复用并只读核验 `runs/dispatch-diagnostic-20260909-manifest/`：48 配置 VERIFIED，
+  前后文件路径和内容 SHA-256 完全一致；没有覆盖或重新生成这批历史证据。
+- implement / code-review 流程的两轴审查发现同一只读漏洞：普通 SQLite mode=ro 在
+  无现存侧车的 WAL 数据库上仍会创建 WAL/SHM。临时夹具修前红、修后绿；现采用
+  mode=ro&immutable=1，并保留侧车拒绝及前后哈希核验。文档明确只能用于静止、已关闭
+  的证据，不能对并发写入数据使用；两轴复核均关闭此问题。
+- 全量 157 项测试通过（新增 15 项），覆盖重封后的错误分数/私有导出/账本、缺失及损坏、
+  计划重复、布尔数字混淆、来源/哈希不一致、读取中变化和 WAL 只读副作用。
+  命令行烟测有效证据退出 0；不存在目录退出 1 且未创建目录。一次烟测包装命令因
+  PowerShell/Python 引号转义失败，改用直接 CLI 调用后完成；不是实验失败或选择性重跑。
+- 仍未实现 dispatch 的统一运行状态机/事件链适配、独立新任务结构、LLM 公平基线与
+  累计付费预算。下一步可让统一适配器消费独立账本评分，但必须保留策略盲化、私有真值
+  与评分边界，不能直接把本地一致性报告映射为通用“无伤害”。
+- 本轮无付费调用、无真实模型采集、无新增外部投递、无正式投稿。脚本测试和旧数据复核
+  不是论文实验结果、真实性认证或创新性证明。本次远端 CI 需按新提交 SHA 另行核对。
+
+## 历史接续：2026-09-12 安全缺失值版本化收尾
 
 - 复核基线 `0f4b022` 的
   [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34445433460)

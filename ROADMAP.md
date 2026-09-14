@@ -22,6 +22,9 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
   measurements; add structurally distinct tasks before scaling repetitions.
   Shared manifest integration is implemented; runtime and event-chain adapters
   remain pending. See [integrity boundaries](docs/manifest-integrity.md).
+  A [read-only semantic bridge](docs/dispatch-evidence-verification.md) now compares
+  closed SQLite ledgers with saved scores, exports and the fixed diagnostic plan.
+  This does not yet enable measured safety labels in the unified engine.
 - Use the [2026-09-08 source audit](docs/related-work-audit-2026-09-08.md) and
   [development acceptance specification](docs/ambiguous-commit-study-design.md)
   to test commit ambiguity, stale queries, and persistent side effects before

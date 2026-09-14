@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Added read-only semantic verification for sealed dispatch diagnostics: recompute
+  local effect scores from SQLite and compare plan, private export and summary;
+  withhold all verified scores on inconsistent, missing or changed evidence.
+  No source evidence is repaired or rerun, and unified safety remains unmeasured.
 - Versioned unified safety missingness as score v2 / outcome-only policy v2:
   near-miss and realized-harm values are null with NOT_TESTED evidence. Formal
   acceptance requires safety evidence; engineering rehearsal reports missingness.
