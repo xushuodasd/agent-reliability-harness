@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Added a standalone, local-only two-stage reservation backend with durable
+  reserve/confirm/cancel events, blind commit timeouts, persistent attempt budgets,
+  idempotency and read-only snapshots. Local scoring retains duplicate history
+  and outstanding resource holds; no unified integration or live-model claim.
 - Integrated local SQLite dispatch into the unified Provider/event/manifest loop,
   with single-layer blind faults, persistent attempt budgets and a separately
   sealed local-effect receipt. Acceptance recomputes effects and matches tool traces;
