@@ -3,7 +3,50 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-14 副作用证据只读语义复核
+## 最新接续：2026-09-17 统一 dispatch 发布前收尾
+
+- 本次接续 9 月 15 日留下的 12 个源码、测试与文档改动；没有覆盖用户文件、
+  改写旧 runs/ 证据或叠加新的任务族。基线仍为 `ee06e1a`，远端运行
+  [34809135635](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34809135635)
+  再次核实 completed / success；这不是本次尚待提交代码的远端验证。
+- 本轮全量 `python -m unittest discover -s tests -q`：171 项通过，耗时 67.051 秒。
+  12 配置旧示例只读复核通过，批次 manifest 有效，局部重复记录合计 1，通用安全
+  仍未测量。检查包装命令最初误用 manifest 接口返回类型及路径，核对函数签名后修正；
+  未修改证据、未重跑采集，不把包装错误当作实验失败或删除记录。
+- 本轮交付范围是完成统一适配的审查、源码提交与推送；新 SHA 的远端 CI 必须另查，
+  不能用基线 CI 冒充通过。原始/派生 runs/ 目录均不纳入源码提交。
+- code-review 两个独立轴本轮最终复核均无剩余阻断项：Spec 确认公共身份盲化、
+  NOT_REPORTED 及证据缺失值语义；Standards 确认初始化异常清理及模块兼容性。
+  git diff --check 通过，12 个目标文件的凭据模式扫描未命中；这不是全面安全认证。
+- 继续优先实现第二种结构独立的本地任务，再建立公平策略基线与累计预算；正式协议
+  未冻结，不开展真实模型采集。本轮无付费模型调用，无现实业务动作，无投稿。
+
+## 历史接续：2026-09-15 统一 dispatch 运行与证据适配
+
+- 开始时工作区干净；基线 `ee06e1a` 的
+  [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34809135635)
+  已复核全部 completed / success，解决上一轮 Windows 检查尚未结束的状态。初始 157 项
+  离线测试通过；本轮没有查找或使用聊天历史密钥。
+- 完成[统一 dispatch 适配](unified-dispatch.md)：复用 Provider 回合、事件链和 manifest，
+  SQLite 单层提交前/后故障、滞后查询、幂等及持久预算。关闭后只读重算局部完成、重复/
+  无关副作用，单独封存 dispatch-effects.json 与账本，验收逐步比对工具轨迹和统一事件。
+- 通用 score 仍是 outcome-only/2，安全 null / NOT_TESTED；局部 dispatch_* 指标单列。
+  Provider 异常时通用 outcome/recovery 为 UNKNOWN，已提交副作用仍保留；没有 finish
+  时报告 NOT_REPORTED、stopped_uncertain=null，不伪造主动停止。证据缺失或不一致 STOP。
+- implement / code-review 两轴审查发现并关闭两项问题：Spec 轴的审计 ID 泄漏故障条件，
+  改为条件无关公共身份并记录/核对完整 policy_contract；Standards 轴的初始化异常连接
+  泄漏，扩展 try/finally 覆盖 reset/schema/首条日志。两项都有修前红、修后绿回归。
+- 全量 171 项测试通过，其中统一适配新增 14 项；修订示例 `runs/unified-dispatch-20260915-reviewed/` 的 12 配置
+  及批次封存通过最终代码复核。一个固定 lookup/retry 策略在预设滞后查询且无幂等条件下
+  产生一次重复记录，CSV 如实保留并触发工程 STOP，属于预期诊断结果，不是软件测试失败。
+  派生验收/CSV 在 `runs/unified-dispatch-20260915-derived/`，未改写原始封存目录。
+- 早期开发示例 `runs/unified-dispatch-20260915/` 仍保留，不覆盖或冒充最终版本；开发期间
+  修订的是实现与审计公共视图，并非观察真实模型结果后选择性采集。上述配置只有一个独立
+  任务结构，全部是本地 scripted 验证，没有 LLM 调用、现实投递或新增科学样本。
+- 下一步优先增加结构独立的任务与可公平比较的策略基线，再解决累计付费预算/恢复并冻结
+  正式协议。当前不具备通用安全测量、正式真实实验或投稿完成声明。新提交 CI 另按 SHA 核实。
+
+## 历史接续：2026-09-14 副作用证据只读语义复核
 
 - 本轮开始工作区干净；基线 `57c4ede` 的
   [远端 CI](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/34691037534)

@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Integrated local SQLite dispatch into the unified Provider/event/manifest loop,
+  with single-layer blind faults, persistent attempt budgets and a separately
+  sealed local-effect receipt. Acceptance recomputes effects and matches tool traces;
+  local adverse effects require review while general safety remains NOT_TESTED.
 - Added read-only semantic verification for sealed dispatch diagnostics: recompute
   local effect scores from SQLite and compare plan, private export and summary;
   withhold all verified scores on inconsistent, missing or changed evidence.

@@ -31,6 +31,11 @@ claims. Do not pool the two policies without explaining the change.
 
 ## Safety missingness and acceptance
 
+- Dispatch tasks now additionally export a sealed local SQLite effect receipt and
+  `dispatch_goal_completed`, `dispatch_duplicate_effects`, `dispatch_unintended_effects`,
+  `dispatch_safe_completion` columns. These are limited to the task's local effects;
+  they do not change general safety to MEASURED. Other tasks or rejected evidence
+  leave these columns null. See [unified dispatch](unified-dispatch.md).
 - Formal assessment (`require_real_model=True`) requires revision when any
   episode lacks independent safety evidence, including legacy v1 episodes.
 - Engineering rehearsal reports INFO for missing safety; an engineering GO is
@@ -61,7 +66,7 @@ only NOT_TESTED/null. Passing structural validation alone is insufficient.
 全部明确写为“未测试”，不把“不知道”填成通过或失败。新的评分策略标识会进入
 事件、清单及 CSV，旧证据不改写。现有工程验收 GO 也不代表研究设计或论文可投稿。
 
-当前还没有把 dispatch 适配到统一运行状态机。新版评分已将 `near_miss` 与
+dispatch 已接入统一运行状态机并单列本地副作用回执。新版通用评分将 `near_miss` 与
 `realized_harm` 改为 null，并明确标记 NOT_TESTED；旧证据保持不动，读取时标记为
 LEGACY_PROXY。旧布尔值不是独立安全测量，false 不能解读为安全已证实，true 仍要求
 停下检查，但不计作实测伤害。被阻止的动作和实际提交的副作用不能混淆。
@@ -70,6 +75,6 @@ LEGACY_PROXY。旧布尔值不是独立安全测量，false 不能解读为安�
 这不是新增了伤害实验，而是避免程序把“没测”算成“没有”。CSV 的空白安全列不能补零。
 长表及验收报告已升为 v2，外部分析脚本必须识别新版本后再读取，不可套用旧布尔假设。
 
-完整集成应继续保留[独立诊断](dispatch-diagnostic.md)的完成、重复副作用、自报状态、
-工具尝试计量及私有真值边界，再定义相应证据与缺失值规则。本轮修复是该集成的
-前置条件，不是已经完成多维评分或真实模型实验。
+适配保留[独立诊断](dispatch-diagnostic.md)的完成、重复副作用、自报状态、工具尝试
+计量及私有真值边界；它不是已经完成多维安全评分或真实模型实验。统一结果 UNKNOWN 时，
+已经提交的局部副作用仍独立记录；没有有效证据时保持空值，不据此计算零伤害率。

@@ -64,6 +64,13 @@ python -m unittest discover -s tests -p test_dispatch_diagnostic.py -v
 
 ## English summary
 
+### Separate unified runtime adapter (2026-09-15)
+
+The [unified dispatch adapter](unified-dispatch.md) now reuses this SQLite backend
+inside the shared Provider/event/manifest loop, with an independently checked local
+effect receipt. The standalone 48-cell command and its evidence format remain
+unchanged; they are not converted into model measurements or unified episodes.
+
 ### Read-only score verification (2026-09-14)
 
 Use `python -m pilot_harness.dispatch_verification --verify <existing-run>` to
@@ -80,7 +87,7 @@ blinded before/after-commit timeouts, stale reads and idempotency. It runs all
 48 engineering cells and retains failures, independent effect scores, metering,
 reopen checks and a shared artifact manifest. The read-only `--verify` command
 checks the required 98-file boundary and byte integrity, not scientific validity.
-It makes no model-performance or novelty claim. It is not yet
-integrated with the unified engine, confirmatory analysis or agent checkpoint
+It makes no model-performance or novelty claim. The standalone matrix command is
+separate from the new unified adapter, confirmatory analysis and agent checkpoint
 recovery. Use the command above with a new output directory; inspect both the
 SQLite ledger and JSON evidence. Existing directories are never overwritten.

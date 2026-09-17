@@ -66,6 +66,11 @@ def _snapshot(path: Path) -> dict:
             "counters": {key: meta[key] for key in COUNTERS}, "effects": effects, "trace": trace}
 
 
+def read_dispatch_snapshot(path: Path) -> dict:
+    """Public read-only ledger seam for closed, quiescent local dispatch evidence."""
+    return _snapshot(path)
+
+
 def verify_dispatch_evidence(output: Path) -> dict:
     """Recompute all fixed v1 cells; any failure withholds all verified scores.
 

@@ -16,12 +16,13 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
 - Apply the [outcome-only scoring policy](docs/scoring-semantics.md); independently
   measure harm and stop decisions before claiming multidimensional reliability.
   Versioned null safety fields and missing-evidence acceptance gates are implemented;
-  independent safety measurements in the unified engine remain pending.
+  general safety measurements remain pending; task-local dispatch effects are separate.
 - Adapt the tested [standalone dispatch diagnostic](docs/dispatch-diagnostic.md)
   to unified evidence interfaces without conflating scripted checks with model
   measurements; add structurally distinct tasks before scaling repetitions.
-  Shared manifest integration is implemented; runtime and event-chain adapters
-  remain pending. See [integrity boundaries](docs/manifest-integrity.md).
+  Shared manifest integration and the [local dispatch runtime/event adapter](docs/unified-dispatch.md)
+  are implemented. More independent task structures, fair LLM baselines and
+  end-to-end recovery remain pending. See [integrity boundaries](docs/manifest-integrity.md).
   A [read-only semantic bridge](docs/dispatch-evidence-verification.md) now compares
   closed SQLite ledgers with saved scores, exports and the fixed diagnostic plan.
   This does not yet enable measured safety labels in the unified engine.
