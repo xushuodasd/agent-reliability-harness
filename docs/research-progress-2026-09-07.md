@@ -3,7 +3,34 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-17 两阶段资源预留独立后端
+## 最新接续：2026-09-19 资源预留统一运行与证据验收
+
+- 本轮开始工作区干净，基线 `c191675` 的
+  [远端 CI 35173733527](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35173733527)
+  已核实 completed / success；基线全量 181 项测试通过（65.426 秒）。
+- 按[统一预留实施契约](unified-reservation.md)接入 ReservationTaskSpec 与适配器，
+  复用 Provider、事件链、通用 UNKNOWN 和封存机制。真实审计 ID 不给策略，故障仅由
+  SQLite 后端注入；关闭后只读比对快照，另存 reservations.sqlite3 和独立副作用回执。
+- 普通 score 的安全字段仍为 null / NOT_TESTED；新 reservation_* 列单列本地目标、
+  历史重复/意外预留、悬挂资源及局部安全完成。Provider 异常不抹去资源占用；没有
+  finish 不推断主动停止。局部副作用为正触发工程 STOP，不等同现实伤害或论文拒稿。
+- 验收跨查目标、配置、计量、故障、完整公共契约、工具事件与 SQLite 轨迹；缺失或
+  不一致返回错误且局部列全部置 null。CSV 保留未测空值。旧 dispatch 的身份、回执名
+  和封存格式保持不变；两种本地结构不等于多样化基准或独立科学样本。
+- implement / TDD 首个集成用例先因适配模块缺失失败，实现后通过；首轮全量 182 项
+  通过（63.147 秒）。新增共 10 项集成测试覆盖盲化、幂等/补偿、预算、初始化关闭、
+  异常停止、自定义目标、篡改/缺失证据、CSV 和旧任务兼容；专项测试全部通过。
+  5 个 Python 文件的 3.10 语法检查通过，不替代实际跨版本远端测试。
+- 最终全量 191 项通过（61.944 秒）。新版验收器对旧 dispatch 12 配置的只读复核通过，
+  批次 manifest 有效，前后文件集合及 SHA-256 不变，新 reservation 列均保持未测量。
+  git diff --check 通过；12 个目标文件的凭据模式扫描未命中。新提交 CI 待按 SHA 单独核查。
+- code-review 的 Spec 与 Standards 两项独立只读审查均无阻断项。交叉核验不是签名、
+  来源真实性证明或异构参考模型的完整轨迹验证；未扩展为通用安全测量。
+- 下一步优先固定同环境、同预算的 scripted 策略对照及封存比较计划，再补相应模型
+  基线、累计付费预算和正式协议。查询滞后、聚类分析适配、整代理恢复仍有缺口。
+  本轮无真实模型调用、付费消费、现实业务动作或投稿，旧 runs/ 证据未改写。
+
+## 历史接续：2026-09-17 两阶段资源预留独立后端
 
 - 开始时工作区干净，基线 `b8a90d3` 的
   [远端 CI 35169441922](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35169441922)

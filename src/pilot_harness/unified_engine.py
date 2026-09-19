@@ -1,4 +1,4 @@
-"""One auditable state machine for file, longitudinal, security and dispatch tasks."""
+"""One auditable state machine for file, service and local persistent tasks."""
 from __future__ import annotations
 
 import hashlib
@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from .audit import verify_chain
-from .dispatch_adapter import ARTIFACTS as DISPATCH_ARTIFACTS, FAULT_MAP, DispatchAdapter, DispatchTaskSpec
+from .dispatch_adapter import FAULT_MAP, DispatchAdapter, DispatchTaskSpec
+from .reservation_adapter import ACTIONS as RESERVATION_ACTIONS, ReservationAdapter, ReservationTaskSpec
 from .environments import TaskSliceEnvironment
 from .faults import FaultInjector
 from .logging import JsonlLogger
@@ -82,7 +83,10 @@ class UnifiedEpisodeResult:
     artifact_dir: str
 
 
-def _contract(task: Task | TaskSliceSpec | SecurityTaskSpec | DispatchTaskSpec, episode_id: str) -> EpisodeContract:
+def _contract(task: Task | TaskSliceSpec | SecurityTaskSpec | DispatchTaskSpec | ReservationTaskSpec, episode_id: str) -> EpisodeContract:
+    if isinstance(task, ReservationTaskSpec):
+        return EpisodeContract(episode_id, task.task_id, "reservation", task.public_instruction(),
+                               RESERVATION_ACTIONS, task.max_steps)
     if isinstance(task, DispatchTaskSpec):
         return EpisodeContract(episode_id, task.task_id, "dispatch", task.public_instruction(),
                                ("dispatch", "lookup"), task.max_steps)
@@ -111,12 +115,14 @@ class UnifiedEpisodeEngine:
         self.run_dir.mkdir(parents=True, exist_ok=True)
         self.schema = SchemaRegistry(schema_dir or Path(__file__).parent / "schemas")
 
-    def run(self, task: Task | TaskSliceSpec | SecurityTaskSpec | DispatchTaskSpec, provider: Provider,
+    def run(self, task: Task | TaskSliceSpec | SecurityTaskSpec | DispatchTaskSpec | ReservationTaskSpec, provider: Provider,
             fault: str = "none", episode_id: str | None = None,
             fault_actions: tuple[str, ...] | None = None) -> UnifiedEpisodeResult:
         injector = FaultInjector(fault, eligible_actions=fault_actions)
         if isinstance(task, DispatchTaskSpec) and (fault not in FAULT_MAP or fault_actions not in (None, ("dispatch",))):
             raise ValueError("dispatch supports only none/before/after timeout on dispatch")
+        if isinstance(task, ReservationTaskSpec) and (fault not in FAULT_MAP or fault_actions not in (None, ("reserve",))):
+            raise ValueError("reservation supports only none/before/after timeout on reserve")
         # Identity is allocated before setup/provider work, so infrastructure failures remain attributable.
         episode_id = episode_id or uuid.uuid4().hex
         episode_dir = self.run_dir / "episodes" / episode_id
@@ -126,11 +132,12 @@ class UnifiedEpisodeEngine:
         logger = JsonlLogger(episode_dir / "events.jsonl")
         contract = _contract(task, episode_id)
         started = time.perf_counter()
-        dispatch = DispatchAdapter(task, episode_dir, fault) if isinstance(task, DispatchTaskSpec) else None
-        cleanup = dispatch
+        persistent = (ReservationAdapter(task, episode_dir, fault) if isinstance(task, ReservationTaskSpec) else
+                      DispatchAdapter(task, episode_dir, fault) if isinstance(task, DispatchTaskSpec) else None)
+        cleanup = persistent
         try:
-            if dispatch is not None:
-                reset, execute, verify = dispatch.reset_receipt(), dispatch.execute, dispatch.verify
+            if persistent is not None:
+                reset, execute, verify = persistent.reset_receipt(), persistent.execute, persistent.verify
             else:
                 reset, cleanup, execute, verify = self._prepare(task, episode_dir)
             self.schema.validate(reset, "reset-receipt.schema.json")
@@ -138,15 +145,15 @@ class UnifiedEpisodeEngine:
             claimed = False
             provider_failed: str | None = None
             # Audit IDs can encode conditions. Only the evaluator sees them.
-            public_contract = (replace(contract, episode_id="policy-episode", task_id="dispatch-task")
-                               if dispatch is not None else contract)
+            public_contract = (replace(contract, episode_id="policy-episode", task_id=persistent.family + "-task")
+                               if persistent is not None else contract)
             logger.write({"event": "episode_start", "episode_id": episode_id,
                           "contract": asdict(contract), "reset_receipt": reset,
                           "provider": provider.name, "fault": fault,
                           "scoring_policy": SCORING_POLICY,
                           "fault_actions": list(fault_actions) if fault_actions else None,
-                          **({"dispatch_task": asdict(task), "policy_contract": asdict(public_contract)}
-                             if dispatch is not None else {})})
+                          **({persistent.family + "_task": asdict(task), "policy_contract": asdict(public_contract)}
+                             if persistent is not None else {})})
             for step in range(1, contract.max_steps + 1):
                 try:
                     action = provider.next_action(public_contract, history)  # type: ignore[arg-type]
@@ -162,7 +169,7 @@ class UnifiedEpisodeEngine:
                     break
                 if action.kind not in contract.allowed_actions:
                     observation = Observation(False, None, "action not allowed by episode contract")
-                elif dispatch is not None:
+                elif persistent is not None:
                     # SQLite owns fault injection and meters every admitted attempt.
                     observation = execute(action, injector)
                 else:
@@ -178,7 +185,7 @@ class UnifiedEpisodeEngine:
                               "observation": _redact(asdict(observation)), "fault_injected": injector.injected})
 
             passed, reason, violations = verify()
-            dispatch_effects = dispatch.seal(claimed) if dispatch is not None else None
+            local_effects = persistent.seal(claimed) if persistent is not None else None
             receipt = injector.receipt().to_dict()
             self.schema.validate(receipt, "injection-receipt.schema.json")
             # A crash or step-limit stop is not evidence of a deliberate safe stop.
@@ -189,7 +196,7 @@ class UnifiedEpisodeEngine:
                                   claimed and not passed, None, None, "NOT_TESTED",
                                   provider_failed, provider_failed is None, reason,
                                   ("events.jsonl", "verification.json", "reset-receipt.json", "injection-receipt.json")
-                                  + (DISPATCH_ARTIFACTS if dispatch is not None else ()))
+                                  + (persistent.artifacts if persistent is not None else ()))
             score_data = asdict(score)
             score_data["evidence_refs"] = list(score.evidence_refs)
             self.schema.validate(score_data, "score-v2.schema.json")
@@ -202,7 +209,7 @@ class UnifiedEpisodeEngine:
                 (episode_dir / name).write_text(json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
             logger.write({"event": "episode_end", "episode_id": episode_id, "score": score_data,
                           "injection_receipt": receipt,
-                          **({"dispatch_effects": dispatch_effects} if dispatch is not None else {})})
+                          **({persistent.family + "_effects": local_effects} if persistent is not None else {})})
             chain = verify_chain(episode_dir / "events.jsonl")
             if not chain.valid:
                 raise RuntimeError(f"invalid audit chain: {chain.error}")

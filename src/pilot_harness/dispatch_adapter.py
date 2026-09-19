@@ -66,6 +66,9 @@ def _observation(result):
 
 
 class DispatchAdapter:
+    family = "dispatch"
+    artifacts = ARTIFACTS
+
     def __init__(self, task, folder, fault):
         self.task, self.folder = task, folder
         self.env = DispatchDiagnostic.create(folder / "effects.sqlite3",

@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Integrated two-stage reservations with the unified runtime and separate sealed
+  effect receipts. Acceptance cross-checks ledger scores, metering and tool events;
+  duplicate/unintended reservations or outstanding holds trigger an engineering
+  review gate. General safety remains unmeasured, and old dispatch formats remain.
 - Added a standalone, local-only two-stage reservation backend with durable
   reserve/confirm/cancel events, blind commit timeouts, persistent attempt budgets,
   idempotency and read-only snapshots. Local scoring retains duplicate history

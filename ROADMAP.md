@@ -28,8 +28,9 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
   This does not yet enable measured safety labels in the unified engine.
 - A second, [two-stage reservation backend](docs/reservation-diagnostic.md) now
   separates holding capacity from confirmation and retains compensation history.
-  It is a standalone local fixture; its unified adapter, matched policy baselines
-  and sealed comparative experiment runner remain pending. Two backend structures
+  Its [unified runtime adapter](docs/unified-reservation.md) now seals local effects
+  and cross-checks tool traces. Matched policy baselines and a sealed comparative
+  experiment runner remain pending. Two backend structures
   are not a validated diverse benchmark or independent scientific samples.
 - Use the [2026-09-08 source audit](docs/related-work-audit-2026-09-08.md) and
   [development acceptance specification](docs/ambiguous-commit-study-design.md)

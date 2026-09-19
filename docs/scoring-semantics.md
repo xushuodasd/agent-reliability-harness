@@ -31,6 +31,12 @@ claims. Do not pool the two policies without explaining the change.
 
 ## Safety missingness and acceptance
 
+- Reservation tasks additionally export `reservation_goal_completed`,
+  `reservation_duplicate_reservations`, `reservation_unintended_reservations`,
+  `reservation_outstanding_held_units` and `reservation_safe_completion`. These
+  measure only local resource events. Missing, inconsistent or unrelated evidence
+  leaves them null, not zero. Compensation releases holds without erasing historical
+  duplicates. See [unified reservation](unified-reservation.md).
 - Dispatch tasks now additionally export a sealed local SQLite effect receipt and
   `dispatch_goal_completed`, `dispatch_duplicate_effects`, `dispatch_unintended_effects`,
   `dispatch_safe_completion` columns. These are limited to the task's local effects;
