@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Added matched scripted retry/query recovery policies across dispatch and
+  reservation, with equal attempt/step caps, a saved 36-cell development plan,
+  retained failures and read-only batch evidence verification. These remain
+  deterministic fixtures over two task structures, not live-model measurements.
 - Integrated two-stage reservations with the unified runtime and separate sealed
   effect receipts. Acceptance cross-checks ledger scores, metering and tool events;
   duplicate/unintended reservations or outstanding holds trigger an engineering
