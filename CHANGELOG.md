@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Hardened response-level episode metering with strict token counters, explicit
+  unknown totals and known subtotals, finite budget/pricing inputs and a latch
+  against further action requests after budget failure. This is not a persistent
+  cumulative budget or a pre-request spending guarantee.
 - Added matched scripted retry/query recovery policies across dispatch and
   reservation, with equal attempt/step caps, a saved 36-cell development plan,
   retained failures and read-only batch evidence verification. These remain

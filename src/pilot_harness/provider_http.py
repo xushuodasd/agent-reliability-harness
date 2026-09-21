@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import time
 import urllib.error
 import urllib.request
 from dataclasses import asdict, dataclass, is_dataclass
+from fractions import Fraction
 from typing import Callable, Mapping
 
 from .models import Action, Observation, Task
@@ -65,6 +67,32 @@ def _header(headers: Mapping[str, str] | None, *names: str) -> str | None:
     return next((lowered[n.lower()] for n in names if n.lower() in lowered), None)
 
 
+def _usage_counts(usage: object) -> tuple[int | None, int | None, int | None]:
+    """Validate declared counters without coercion or repairing contradictions."""
+    if not isinstance(usage, dict):
+        return None, None, None
+    prompt, completion, total = (usage.get(key) for key in
+                                 ('prompt_tokens', 'completion_tokens', 'total_tokens'))
+    if any(value is not None and (type(value) is not int or value < 0)
+           for value in (prompt, completion, total)):
+        return None, None, None
+    if prompt is not None and completion is not None:
+        derived = prompt + completion
+        if total is not None and total != derived:
+            return None, None, None
+        total = derived
+    if total is not None and any(value is not None and value > total for value in (prompt, completion)):
+        return None, None, None
+    return prompt, completion, total
+
+
+def _finite_number(value: object) -> bool:
+    try:
+        return type(value) in (int, float) and math.isfinite(value)
+    except OverflowError:
+        return False
+
+
 class OpenAICompatibleProvider(Provider):
     """Chat adapter with observable usage and fail-closed episode budgets."""
 
@@ -80,16 +108,16 @@ class OpenAICompatibleProvider(Provider):
             raise ValueError("scaffold must be basic or verified")
         if json_mode not in {"auto", "required", "disabled"}:
             raise ValueError("json_mode must be auto, required, or disabled")
-        if max_output_tokens < 1:
-            raise ValueError("max_output_tokens must be positive")
-        if max_episode_tokens is not None and max_episode_tokens <= 0:
-            raise ValueError("max_episode_tokens must be positive")
-        if max_episode_cost_usd is not None and max_episode_cost_usd <= 0:
-            raise ValueError("max_episode_cost_usd must be positive")
+        if type(max_output_tokens) is not int or max_output_tokens < 1:
+            raise ValueError("max_output_tokens must be a positive integer")
+        if max_episode_tokens is not None and (type(max_episode_tokens) is not int or max_episode_tokens <= 0):
+            raise ValueError("max_episode_tokens must be a positive integer")
+        if max_episode_cost_usd is not None and (not _finite_number(max_episode_cost_usd) or max_episode_cost_usd <= 0):
+            raise ValueError("max_episode_cost_usd must be finite and positive")
         for value, label in ((input_cost_per_million_usd, "input_cost_per_million_usd"),
                              (output_cost_per_million_usd, "output_cost_per_million_usd")):
-            if value is not None and value < 0:
-                raise ValueError(f"{label} cannot be negative")
+            if value is not None and (not _finite_number(value) or value < 0):
+                raise ValueError(f"{label} must be finite and nonnegative")
         if max_episode_cost_usd is not None and (input_cost_per_million_usd is None or output_cost_per_million_usd is None):
             raise ValueError("cost budget requires both input and output pricing")
         self.scaffold, self.timeout_seconds = scaffold, timeout_seconds
@@ -100,6 +128,7 @@ class OpenAICompatibleProvider(Provider):
         self._transport = transport or _default_transport
         self._metadata: list[CallMetadata] = []
         self._episode_tokens, self._episode_cost, self._episode_call_start = 0, 0.0, 0
+        self._episode_budget_error: str | None = None
 
     @property
     def name(self) -> str:
@@ -112,10 +141,18 @@ class OpenAICompatibleProvider(Provider):
     def begin_episode(self) -> None:
         self._episode_tokens, self._episode_cost = 0, 0.0
         self._episode_call_start = len(self._metadata)
+        self._episode_budget_error = None
 
     def episode_usage(self) -> dict:
         current = self._metadata[self._episode_call_start:]
-        return {"total_tokens": self._episode_tokens, "cost_usd": round(self._episode_cost, 10),
+        metered = [item for item in current if item.operation == 'next_action']
+        tokens_complete = all(item.total_tokens is not None for item in metered)
+        cost_complete = self._episode_cost is not None and all(item.cost_usd is not None for item in metered)
+        return {"total_tokens": self._episode_tokens if tokens_complete else None,
+                "cost_usd": self._episode_cost if cost_complete else None,
+                "known_tokens": self._episode_tokens, "known_cost_usd": self._episode_cost,
+                "tokens_complete": tokens_complete, "cost_complete": cost_complete,
+                "usage_scope": "next_action_success_responses", "metered_calls": len(metered),
                 "calls": len(current), "requests": [asdict(item) for item in current]}
 
     def _key(self) -> str:
@@ -126,6 +163,8 @@ class OpenAICompatibleProvider(Provider):
 
     def _send(self, path: str, *, payload: dict | None, operation: str,
               json_mode: bool | None = None) -> dict:
+        if operation == 'next_action' and self._episode_budget_error is not None:
+            raise EpisodeBudgetExceeded(self._episode_budget_error)
         api_key = self._key()
         request = urllib.request.Request(f"{self.base_url}/{path.lstrip('/')}",
             data=None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -137,13 +176,17 @@ class OpenAICompatibleProvider(Provider):
         response = raw if isinstance(raw, HttpResponse) else HttpResponse(raw)
         data = json.loads(response.body.decode("utf-8"))
         usage = data.get("usage") if isinstance(data, dict) else None
-        usage = usage if isinstance(usage, dict) else {}
-        prompt, completion, total = (usage.get("prompt_tokens"), usage.get("completion_tokens"), usage.get("total_tokens"))
-        if total is None and isinstance(prompt, int) and isinstance(completion, int):
-            total = prompt + completion
+        prompt, completion, total = _usage_counts(usage)
         cost = None
         if isinstance(prompt, int) and isinstance(completion, int) and self.input_cost_per_million_usd is not None and self.output_cost_per_million_usd is not None:
-            cost = (prompt * self.input_cost_per_million_usd + completion * self.output_cost_per_million_usd) / 1_000_000
+            try:
+                cost = float((prompt * Fraction(str(self.input_cost_per_million_usd))
+                              + completion * Fraction(str(self.output_cost_per_million_usd)))
+                             / 1_000_000)
+                if not math.isfinite(cost):
+                    cost = None
+            except OverflowError:
+                cost = None
         request_id = _header(response.headers, "x-request-id", "request-id", "x-amzn-requestid")
         if request_id and api_key in request_id:
             request_id = "[redacted]"
@@ -152,13 +195,22 @@ class OpenAICompatibleProvider(Provider):
             total if isinstance(total, int) else None, cost, json_mode))
         metered = operation == "next_action"
         if metered and isinstance(total, int): self._episode_tokens += total
-        if metered and cost is not None: self._episode_cost += cost
-        if metered and self.max_episode_tokens is not None:
-            if total is None: raise EpisodeBudgetExceeded("provider omitted usage; token budget cannot be enforced")
-            if self._episode_tokens > self.max_episode_tokens: raise EpisodeBudgetExceeded("episode token budget exceeded")
-        if metered and self.max_episode_cost_usd is not None:
-            if cost is None: raise EpisodeBudgetExceeded("pricing or usage missing; cost budget cannot be enforced")
-            if self._episode_cost > self.max_episode_cost_usd: raise EpisodeBudgetExceeded("episode cost budget exceeded")
+        if metered and cost is not None and self._episode_cost is not None:
+            combined = self._episode_cost + cost
+            self._episode_cost = combined if math.isfinite(combined) else None
+        if metered:
+            if self.max_episode_tokens is not None:
+                if total is None:
+                    self._episode_budget_error = 'provider usage missing or invalid; token budget cannot be enforced'
+                elif self._episode_tokens > self.max_episode_tokens:
+                    self._episode_budget_error = 'episode token budget exceeded'
+            if self.max_episode_cost_usd is not None:
+                if cost is None or self._episode_cost is None:
+                    self._episode_budget_error = 'pricing, usage or finite cost missing; cost budget cannot be enforced'
+                elif self._episode_cost > self.max_episode_cost_usd:
+                    self._episode_budget_error = 'episode cost budget exceeded'
+            if self._episode_budget_error is not None:
+                raise EpisodeBudgetExceeded(self._episode_budget_error)
         return data
 
     def preflight(self, probe: str = "models") -> dict:

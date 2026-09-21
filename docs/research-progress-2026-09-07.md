@@ -3,7 +3,35 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-21 配对脚本策略与完整批次封存
+## 最新接续：2026-09-21 第二轮，响应计量完整性防护
+
+- 本轮工作区起始干净，基线 `5167697`；已确认对应
+  [远端 CI 35553814584](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35553814584)
+  completed / success。开始修改前适配器原有 14 项离线测试通过；未读取或使用聊天旧密钥。
+- 在推进累计预算前，先按[计量实施契约](provider-metering.md)修复既有适配器漏洞：
+  字符串、小数、bool、负数及相互矛盾的 token 声明都能让旧预算逻辑失效；红测逐一复现。
+  现在只接受非负整数，保留 total-only，合法分项缺 total 时可求和，矛盾不静默修正。
+- 相应用量未知时，总量返回 null，保留已知小计和完整性标记；没有配置价格不记为免费。
+  预算超额或无法核实后，同一 episode 的后续 next_action 在传输前拒绝；显式新 episode
+  才能重置。该锁存不等于跨批次消费预算，也不授权通过重置逃避限额。
+- 费率/金额限额拒绝 bool、NaN、inf、非法类型；token 限额拒绝非整数。费用估算采用
+  精确有理数中间计算，单次或已知合计无法表示时为 null；有费用预算时停止后续请求。
+  溢出测试先复现 inf/OverflowError，中间浮点调整暴露原有 0.0003 精度回归，已修复，
+  原测试断言未放宽。Standards 终审另发现调用者 Decimal 上下文会低估费用；低精度及
+  Inexact trap 红测复现后改为 Fraction 计算，隔离外部数值状态。错误响应、chat preflight、
+  断网消费仍在完整计费保证范围之外。
+- implement / TDD 分片后全量 206 / 207 / 208 项分别通过（98.471 / 99.662 / 99.228 秒）；
+  中间 209 项运行保留了 0.0003 精度回归失败记录，修复后最终全量 **210 项通过
+  （97.800 秒）**；适配器 19 项通过。比本轮基线新增 5 项参数化行为测试。
+  code-review 两路终审确认各自范围的阻断项关闭；Python 3.10 语法检查通过。
+  额外离线检查确认：total-only 可用但费用未知、缺失 usage 保留未知、合法零费率/零用量
+  可记为零。初次临时检查命令因 PowerShell 引号出错未执行，改正命令后验证通过。
+- 本轮仅离线响应测试，没有新增真实模型调用、付费实验、正式数据或投稿。累计预算账本、
+  请求前预占、未知请求对账、崩溃恢复仍未实现；UnifiedEpisodeEngine 的真实模型生命周期
+  也尚需接入验证。下一轮优先定义并实现持久账本的 reserve/settle/unknown 语义，统一覆盖
+  preflight、重试和超时，再做冻结计划与恢复测试；不能因为单 episode 防护通过就开跑。
+
+## 历史接续：2026-09-21 配对脚本策略与完整批次封存
 
 - 开始时工作区干净，基线 `ebd14e1`；已核实
   [CI 35417485220](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35417485220)

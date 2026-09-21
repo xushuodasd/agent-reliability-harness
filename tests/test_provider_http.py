@@ -2,6 +2,7 @@ import json
 import os
 import unittest
 import urllib.error
+from decimal import Inexact, localcontext
 from unittest.mock import patch
 
 from pilot_harness.models import Task
@@ -12,6 +13,104 @@ from pilot_harness.provider_http import (
 
 class ProviderHttpTests(unittest.TestCase):
     task = Task("t", "write", "answer.txt", "ok")
+
+    def test_malformed_usage_cannot_bypass_token_budget(self):
+        usages = [
+            {'total_tokens': '6'}, {'total_tokens': 6.0}, {'total_tokens': True},
+            {'total_tokens': -1}, {'prompt_tokens': True, 'completion_tokens': 2},
+            {'prompt_tokens': -1, 'completion_tokens': 2, 'total_tokens': 1},
+            {'prompt_tokens': 3, 'completion_tokens': 2, 'total_tokens': 1},
+            {'prompt_tokens': 3, 'total_tokens': 2},
+        ]
+        for usage in usages:
+            response = {'choices': [{'message': {'content': '{"kind":"finish"}'}}], 'usage': usage}
+            provider = OpenAICompatibleProvider('http://example.invalid/v1', 'm', max_episode_tokens=5,
+                transport=lambda *_, value=response: json.dumps(value).encode())
+            with self.subTest(usage=usage), patch.dict(os.environ, {'AGENT_PILOT_API_KEY': 'fixture'}):
+                with self.assertRaises(EpisodeBudgetExceeded):
+                    provider.next_action(self.task, [])
+                self.assertIsNone(provider.call_metadata[-1].total_tokens)
+
+    def test_unknown_usage_preserves_subtotal_and_blocks_further_episode_requests(self):
+        calls = []
+        usages = iter([{'prompt_tokens': 1, 'completion_tokens': 1},
+                       {'total_tokens': 'unknown'}, {'prompt_tokens': 1, 'completion_tokens': 1}])
+        def transport(*_):
+            calls.append(1)
+            return json.dumps({'choices': [{'message': {'content': '{"kind":"finish"}'}}],
+                               'usage': next(usages)}).encode()
+        provider = OpenAICompatibleProvider('http://example.invalid/v1', 'm', transport=transport,
+            max_episode_tokens=10, input_cost_per_million_usd=1, output_cost_per_million_usd=1)
+        with patch.dict(os.environ, {'AGENT_PILOT_API_KEY': 'fixture'}):
+            provider.next_action(self.task, [])
+            with self.assertRaises(EpisodeBudgetExceeded):
+                provider.next_action(self.task, [])
+            usage = provider.episode_usage()
+            self.assertIsNone(usage['total_tokens'])
+            self.assertIsNone(usage['cost_usd'])
+            self.assertEqual(usage['known_tokens'], 2)
+            self.assertEqual(usage['known_cost_usd'], 0.000002)
+            self.assertFalse(usage['tokens_complete'])
+            self.assertFalse(usage['cost_complete'])
+            with self.assertRaises(EpisodeBudgetExceeded):
+                provider.next_action(self.task, [])
+            self.assertEqual(len(calls), 2)
+            provider.begin_episode()
+            provider.next_action(self.task, [])
+            self.assertEqual(provider.episode_usage()['total_tokens'], 2)
+            self.assertEqual(provider.episode_usage()['calls'], 1)
+
+    def test_nonfinite_and_noninteger_budget_configuration_is_rejected(self):
+        for name in ('max_output_tokens', 'max_episode_tokens', 'max_episode_cost_usd',
+                     'input_cost_per_million_usd', 'output_cost_per_million_usd'):
+            bad = [True, '5', float('nan'), float('inf'), -1]
+            if name in ('max_output_tokens', 'max_episode_tokens'):
+                bad.extend([1.5, 0])
+            elif name == 'max_episode_cost_usd':
+                bad.append(0)
+            for value in bad:
+                config = {'input_cost_per_million_usd': 1, 'output_cost_per_million_usd': 1, name: value}
+                with self.subTest(name=name, value=value):
+                    with self.assertRaises(ValueError):
+                        OpenAICompatibleProvider('http://example.invalid/v1', 'm', **config)
+
+    def test_cost_overflow_is_unknown_and_latched_not_infinite_or_free(self):
+        for tokens, requests in ((2_000_000, 1), (1_000_000, 2), (10**309, 1)):
+            calls = []
+            def transport(*_):
+                calls.append(1)
+                return json.dumps({'choices': [{'message': {'content': '{"kind":"finish"}'}}],
+                                   'usage': {'prompt_tokens': tokens, 'completion_tokens': 0}}).encode()
+            provider = OpenAICompatibleProvider('http://example.invalid/v1', 'm', transport=transport,
+                max_episode_cost_usd=1e308, input_cost_per_million_usd=1e308, output_cost_per_million_usd=0)
+            with self.subTest(tokens=tokens, requests=requests), patch.dict(os.environ, {'AGENT_PILOT_API_KEY': 'fixture'}):
+                for _ in range(requests - 1):
+                    provider.next_action(self.task, [])
+                    self.assertEqual(provider.call_metadata[-1].cost_usd, 1e308)
+                with self.assertRaises(EpisodeBudgetExceeded):
+                    provider.next_action(self.task, [])
+                usage = provider.episode_usage()
+                self.assertIsNone(usage['cost_usd'])
+                self.assertFalse(usage['cost_complete'])
+                self.assertEqual(usage['total_tokens'], tokens * requests)
+                json.dumps(usage, allow_nan=False)
+                with self.assertRaises(EpisodeBudgetExceeded):
+                    provider.next_action(self.task, [])
+                self.assertEqual(len(calls), requests)
+
+    def test_cost_budget_is_independent_of_callers_decimal_context(self):
+        response = {'choices': [{'message': {'content': '{"kind":"finish"}'}}],
+                    'usage': {'prompt_tokens': 123, 'completion_tokens': 0}}
+        for trap in (False, True):
+            provider = OpenAICompatibleProvider('http://example.invalid/v1', 'm',
+                transport=lambda *_: json.dumps(response).encode(), max_episode_cost_usd=0.000122,
+                input_cost_per_million_usd=1, output_cost_per_million_usd=1)
+            with self.subTest(trap=trap), localcontext() as context, patch.dict(os.environ, {'AGENT_PILOT_API_KEY': 'fixture'}):
+                context.prec = 2
+                context.traps[Inexact] = trap
+                with self.assertRaises(EpisodeBudgetExceeded):
+                    provider.next_action(self.task, [])
+                self.assertEqual(provider.episode_usage()['cost_usd'], 0.000123)
 
     def test_minimax_think_wrapper_is_removed_before_action_parse(self):
         item = _parse_action_content(
