@@ -3,7 +3,38 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-21 第二轮，响应计量完整性防护
+## 最新接续：2026-09-23 独立持久预算状态机
+
+- 工作区起始干净，基线 `fa7cbe0`；对应
+  [CI 35554813373](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35554813373)
+  已核实 completed / success。恢复后的源代码基线全量 **210 项通过（101.420 秒）**。
+- 2026-09-22 仓库误删后已从 GitHub 重新 clone；当前 runs/ 只有 .gitkeep。
+  先前日志中的本地诊断路径和 SHA-256 是历史记录，原未推送文件未恢复，本轮不能重新
+  检验其内容。没有重新生成同名目录冒充原始证据，也没有新增真实模型数据。
+- 按 [预算账本契约](budget-ledger.md)，新增独立 SQLite 状态机：不可变计划 SHA-256
+  与双上限、整数 token / nano-USD；事务内回放检查再预留，提交后才返回首次授权。
+  相同请求重放只返回 False，不授权再发；冲突重放拒绝。
+- 结算保留实际量并释放未用预留；实际超过预留仍记录且永久阻断新预留。unknown
+  保留整笔占用并阻断新请求；其他已在途请求仍可结算。重开不清零、不重新授权。
+  缺失文件恢复时拒绝，不自动创建；已有文件不覆盖，损坏历史不按空账本处理。
+- 首条生命周期测试先因缺少模块失败，实施后通过；第一片全量 **211 项通过
+  （95.218 秒）**。随后扩展双维度限额、冲突终态、超额、unknown、线程多连接争用、
+  子进程 os._exit(9) 后恢复、缺失文件/计划冲突、追加约束/无效事件、只读快照等回归。
+  夹具初次未显式关闭 SQLite 连接导致 Windows 清理失败，改用 closing 后通过，
+  无需改动生产状态机；此时全量 **221 项通过（98.399 秒）**。
+- 独立进程竞争再以 spawn + Barrier 验证：两进程各申请 6 token / 60 nano-USD，
+  面对 10 / 100 上限，仅一笔获准，另一笔拒绝，最终只有一条事件和 6 / 60 占用。
+  新增 12 项专项测试全部通过（0.829 秒）；最终全量 **222 项通过（96.358 秒）**。
+  两个 Python 文件通过 3.10 语法检查，git diff --check 通过；七个目标文件暂存扫描
+  凭据模式 0 命中，未暂存 runs/。推送后的 CI 需按本轮最终 SHA 复核。
+- code-review 已分别执行 Spec 与 Standards 只读审查，生产实现和多进程测试最终
+  审查均无阻断项。没有 API 调用、付费消费、真实实验数据或投稿。
+- 下一步优先把账本接入每一次传输（包括 preflight、兼容回退与超时），固定请求
+  标识、保守 token 上界与 nano-USD 向上取整规则；再验证崩溃恢复、账单对账和统一引擎
+  Provider 生命周期。独立账本尚不等于完整 HTTP 付费保护，不承诺 exactly-once 请求，
+  也未解锁真实采集。正式协议/安全凭据/累计预算集成固定后，首次诊断仍最多 24 episode。
+
+## 历史接续：2026-09-21 第二轮，响应计量完整性防护
 
 - 本轮工作区起始干净，基线 `5167697`；已确认对应
   [远端 CI 35553814584](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35553814584)

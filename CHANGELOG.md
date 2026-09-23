@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Added a standalone SQLite cumulative budget ledger with integer nano-USD/token
+  reservations, idempotent non-authorizing replays, persistent unknown holds,
+  recorded overruns, and serialized admission. HTTP integration and live spending
+  guarantees are not implemented by this offline state-machine component.
 - Hardened response-level episode metering with strict token counters, explicit
   unknown totals and known subtotals, finite budget/pricing inputs and a latch
   against further action requests after budget failure. This is not a persistent

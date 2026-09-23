@@ -10,8 +10,9 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
 - Harden provider retry classification without hiding authentication, quota, or
   truncation failures.
   [Response-metering integrity](docs/provider-metering.md) now rejects malformed
-  counters and exposes missing totals; persistent cumulative paid budgets and
-  ambiguous-request accounting remain separate pending work.
+  counters and exposes missing totals. A [standalone persistent budget ledger](docs/budget-ledger.md)
+  now retains reservations and unknown requests across restart; HTTP admission,
+  paid-request reconciliation and end-to-end recovery remain pending.
 - Validate citation metadata and the JOSS paper in continuous integration.
 
 ## Research validation
