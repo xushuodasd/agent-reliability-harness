@@ -11,7 +11,9 @@ Proposals and independent reproduction reports are welcome in GitHub issues.
   truncation failures.
   [Response-metering integrity](docs/provider-metering.md) now rejects malformed
   counters and exposes missing totals. A [standalone persistent budget ledger](docs/budget-ledger.md)
-  now retains reservations and unknown requests across restart; HTTP admission,
+  now retains reservations and unknown requests across restart. An explicit
+  [single-attempt transport bridge](docs/budgeted-transport.md) adds admission and
+  settlement around an injected transport; automatic all-path CLI integration,
   paid-request reconciliation and end-to-end recovery remain pending.
 - Validate citation metadata and the JOSS paper in continuous integration.
 

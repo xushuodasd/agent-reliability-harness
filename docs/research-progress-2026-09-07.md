@@ -3,7 +3,39 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-23 独立持久预算状态机
+## 最新接续：2026-09-24 显式单次计费传输桥接
+
+- 起始工作区干净，基线 `d85f0d9`；对应
+  [CI 35809554744](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35809554744)
+  已核实 completed / success。修改前全量 **222 项通过（96.548 秒）**。
+- 按[单次传输契约](budgeted-transport.md)，以 implement / TDD 增加显式发送桥接，
+  使用现有持久账本：先 reserve，首次授权后调用一次注入传输，核实 usage 后 settle，
+  最后才交付响应。重复 ID 不能重发；价格用十进制字符串和 Fraction，逐请求向上取整
+  为 nano-USD；token 保守上界乘较高费率作为预留。
+- 缺失/矛盾用量、超时、HTTP 错误或非 2xx 保留完整 unknown 并停止后续新预留；
+  不透传供应商错误文本，也不让 HTTPError 触发既有 Provider 的兼容回退。
+  超额如实入账，拒绝交付响应；非法配置在预留前拒绝。
+- 首测因模块缺失失败；基本生命周期、未知消费、配置拒绝三个分片分别经过红绿验证，
+  分片全量 **223 / 224 / 225 项通过（91.911 / 96.358 / 91.354 秒）**。
+  超额、中断两个分片也先红后绿，全量分别 **226 / 227 项通过（92.867 / 93.626 秒）**。
+- code-review 两路独立审查均发现 HTTPError.close 清理失败会突破安全异常封装；
+  回归先复现原始 OSError 穿透，再隔离清理异常，确认不泄漏文本且保留 unknown。
+  后续 Standards 审查又发现测试内 self.fail 会被封装吞掉的假阳性风险，已改为
+  调用外独立检查发送次数。Spec / Standards 终审各自确认无剩余阻断项。
+- 最终新增 **11 项专项通过（1.310 秒）**，覆盖精确向上取整、Decimal 上下文隔离、
+  双维预算拒绝、用途累计、重复发送、错误响应、未知用量、超额、中断、旧 Provider
+  自动回退拦截及存储写失败时的 pending/unknown 保留。均为离线注入夹具。
+  全量先 **233 项通过（98.304 秒）**，增强测试断言后重新完整运行，最终
+  **233 项通过（93.545 秒）**。两个 Python 文件通过 3.10 语法检查，git diff --check
+  通过，7 个目标暂存文件凭据模式 0 命中，无 runs/ 文件。新提交 CI 留待按最终 SHA 复核。
+- 没有 API 调用、付费消费或新增真实模型结果。桥接尚未自动接入旧 CLI 或统一引擎，
+  不提供模型/费率/请求 payload 与计划摘要的自动绑定；transport 内部额外请求也不在
+  本组件控制内。只有 total 的响应、models 列表、额外工具费用不能推断成免费。
+- 下一步仍需冻结完整发送路径及稳定 ID、验证保守 token 上界、每次 preflight/回退
+  的计费配置、pending 恢复协调和供应商对账，然后才讨论首次最多 24 episode 开发诊断。
+  原 runs/ 历史诊断文件未恢复，不新建同名文件冒充旧证据，不把新账本当作清零授权。
+
+## 历史接续：2026-09-23 独立持久预算状态机
 
 - 工作区起始干净，基线 `fa7cbe0`；对应
   [CI 35554813373](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35554813373)

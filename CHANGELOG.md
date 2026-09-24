@@ -4,6 +4,9 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 
+- Added an opt-in single-attempt transport bridge with durable admission, exact
+  nano-USD estimates and fail-closed unknown usage. Offline fixtures only; CLI
+  integration, frozen request binding and paid-run recovery remain pending.
 - Added a standalone SQLite cumulative budget ledger with integer nano-USD/token
   reservations, idempotent non-authorizing replays, persistent unknown holds,
   recorded overruns, and serialized admission. HTTP integration and live spending
