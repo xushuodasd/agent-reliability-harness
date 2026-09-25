@@ -3,7 +3,23 @@
 Status: research preparation, not submitted, not preregistered, no new live-model
 results collected in this maintenance cycle. Written 2026-09-07.
 
-## 最新接续：2026-09-24 显式单次计费传输桥接
+## 最新接续：2026-09-25 中英文稿件主张核查
+
+- 工作区起始干净，基线 `85ea06c`；对应
+  [CI 35946989410](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35946989410)
+  已核实 completed / success。未使用聊天旧密钥，也未运行真实模型。
+- 对[中英文软件稿](../paper/paper.md)做当前代码与留存证据的定向全文核查，
+  独立只读核查亦指出关键问题。具体证据映射和边界见
+  [稿件主张核查](manuscript-claim-audit-2026-09-25.md)。
+- 同步修订：统一引擎的证据范围、提示式而非强制式核验、models/chat 预检差异、
+  响应后预算的真实边界、一般安全未独立测量、旧运行产物丢失后的历史数字属性、
+  `v0.1.2` DOI 与后续开发代码的版本差异。删除“作者已审阅并核验”的未获确认断言。
+- 72 个探索 episode 和 864 单元彩排是历史文档记录，不因文字保留就变成可重新核验的
+  原始证据；本轮没有复现这些运行，也未宣称外部研究空白或 SCI 可录用。
+- 下一步是冻结引用的软件版本和论文范围、补正式研究的独立任务结构与匹配基线，
+  完成累计预算全路径接入和协议固定；作者本人核实最终稿之后才能考虑投稿。
+
+## 历史接续：2026-09-24 显式单次计费传输桥接
 
 - 起始工作区干净，基线 `d85f0d9`；对应
   [CI 35809554744](https://github.com/xushuodasd/agent-reliability-harness/actions/runs/35809554744)

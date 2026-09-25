@@ -13,7 +13,7 @@ authors:
 affiliations:
   - name: Independent Researcher, China
     index: 1
-date: 4 September 2026
+date: 25 September 2026
 bibliography: paper.bib
 ---
 
@@ -24,9 +24,10 @@ completion message is not sufficient evidence that a task was completed safely
 and correctly. Agent Reliability Harness is a dependency-free Python toolkit for
 controlled and auditable experiments on tool-using agents. It separates action
 proposal from tool execution, injects explicit execution faults, grades
-authoritative postconditions, and seals episode evidence in machine-readable
-artifacts. The toolkit is intended for researchers studying agent reliability,
-recovery, false completion, and safety under reproducible task conditions.
+authoritative postconditions, and provides machine-readable episode evidence
+through its unified engine. The toolkit is intended for researchers studying
+agent reliability, recovery, and false completion under reproducible task
+conditions. Independent measurement of general safety remains future work.
 
 # Statement of need
 
@@ -46,8 +47,9 @@ Agent Reliability Harness addresses this need with five design commitments:
 2. Tool calls pass through an execution layer that can inject faults with an
    explicit receipt describing whether external state changed.
 3. Scoring reads authoritative state independently of the agent's claim.
-4. Every episode emits versioned events, a hash-chain checkpoint, reset and
-   injection receipts, verification and score records, and an artifact manifest.
+4. The unified episode engine records versioned events, a hash-chain checkpoint,
+   reset and injection receipts, verification and score records, and a manifest
+   for completed episodes.
 5. Factorial plans and atomic progress files support deterministic ordering,
    interruption recovery, and independent acceptance checks.
 
@@ -69,19 +71,23 @@ The included task catalog spans deterministic file operations, idempotent ledger
 updates, restricted software configuration repair, optimistic web-backend state,
 and security-policy scenarios. Fault modes include timeout before execution,
 timeout after durable commit, malformed observation, and silent no-op. Baseline
-and verifying scaffolds share an action interface, while the latter performs
-state checks and bounded recovery. A separate OpenAI-compatible adapter supports
-read-only model preflight, JSON-response compatibility handling, token and cost
-accounting, and hard per-episode limits.
+and verifying scaffolds share an action interface; the latter prompts the model
+to check state and attempt bounded recovery, without guaranteeing that it will
+do so. A separate OpenAI-compatible adapter supports model-list lookup or a
+minimal chat preflight, JSON-response compatibility handling, and post-response
+token and cost estimates. Per-episode checks stop later action requests after
+missing or excessive usage; they do not cap the current request. A persistent
+budget ledger and single-attempt transport bridge exist as opt-in components,
+but are not yet wired into every CLI request path.
 
 The analysis layer exports episode-level data and stratified outcomes. A
 hierarchical simulation estimates design sensitivity without treating episodes
 as independent observations. The acceptance command independently recomputes
 schema validity, event-chain integrity, manifest hashes, reset stability,
-injection eligibility, false-success indicators, safety violations, and missing
-data. It returns a machine-readable `GO`, `REVISE`, or `STOP` decision. A
-deterministic 864-cell rehearsal exercises the complete engineering pipeline but
-is explicitly marked as non-model evidence.
+injection eligibility, false-success indicators, policy-violation flags, and
+missing data. It returns a machine-readable `GO`, `REVISE`, or `STOP` decision.
+An engineering `GO` does not establish general safety or publication readiness;
+deterministic rehearsals are not model evidence.
 
 # Quality and research use
 
@@ -99,24 +105,24 @@ plane for bounded synthetic environments and sanitized provider traces.
 
 # Research impact statement
 
-The software has been used by the author to execute a complete 864-cell
-deterministic engineering rehearsal and 72 bounded exploratory episodes against
-two independent OpenAI-compatible model providers. Those runs identified
-provider-compatibility and response-truncation failure modes and exercised the
-same evidence contracts used by the offline test suite. The results are reported
-as engineering validation rather than confirmatory model comparisons; the
-sanitized protocol and limitations are documented in the repository. Broader
-research impact and independent adoption are not yet claimed for this initial
-release.
+The [later engineering summary of early runs](https://github.com/xushuodasd/agent-reliability-harness/blob/85ea06c/docs/pilot-results.md) reports a
+deterministic 864-cell rehearsal and 72 exploratory episodes across two provider
+services. The original untracked local run artifacts were not recovered after a
+September 2026 repository deletion; the retained summary cannot substitute for
+rechecking individual episodes. This draft therefore makes no empirical claim
+about model ranking, effect size, or broad research impact from those historical
+counts. The reproducible code checks, any newly collected study data, and
+independent adoption require separate assessment.
 
 # AI usage disclosure
 
-OpenAI Codex using a GPT-5-family model (accessed September 2026) assisted with
+OpenAI Codex assisted with
 research planning, software implementation, automated-test development,
 documentation, and drafting and language editing of this paper. MiniMax M3 and
-DeepSeek V4 models were used only as subjects in bounded exploratory provider
-tests. The author reviewed the generated material, verified the public artifacts,
-and accepts responsibility for the software, claims, citations, and manuscript.
+DeepSeek V4 appear in the historical exploratory provider-test record. Before
+submission, the author must review generated material, verify public artifacts,
+claims and citations, and approve the final manuscript and disclosure. This
+draft does not assert that those checks are complete.
 
 # Software availability
 
@@ -124,8 +130,10 @@ The source code is publicly available at
 [github.com/xushuodasd/agent-reliability-harness](https://github.com/xushuodasd/agent-reliability-harness).
 All archived versions are identified by the Zenodo concept DOI
 [`10.5281/zenodo.22306201`](https://doi.org/10.5281/zenodo.22306201); the
-reviewed `v0.1.2` release is archived as
+archived `v0.1.2` release is identified by
 [`10.5281/zenodo.22306202`](https://doi.org/10.5281/zenodo.22306202).
+Development on the main branch has continued beyond that tag; the cited frozen
+software version and manuscript claims must be aligned before submission.
 
 # Acknowledgements
 
